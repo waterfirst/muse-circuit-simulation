@@ -105,3 +105,13 @@
 5. Pixel T1 dVth -0.2/0/+0.2V recomputed from saved out.txt: 1.7025/1.6998/
    1.6964 uA (spread 0.36%) — matches SELF_CHECK.txt. Speed measured:
    driver 0.5-1.1s/sim, pixel 0.2s/sim (OMP_THREAD_LIMIT=1).
+
+## 2026-10-29 — /circuit2/ deploy prep (operator order)
+- Frontend now tries same-origin `<page-dir>/api/*` first, falls back to
+  127.0.0.1:8768 (api.ts; post()/getMargin() loop all BACKENDS like
+  tryBackend). +2 vitest (36/36), tsc clean, SELF-CHECK OK.
+- Built /tmp/c2root/circuit2 with --base=/circuit2/; local smoke: page 200,
+  asset 200, backend /health ok. Committed dist/ stays /circuit-muse/.
+- Runbook: docs/DEPLOY_CIRCUIT2.md (static copy, backend A/B, nginx block,
+  sudo reload). Remote steps (scp, nginx, reload) need the user: sandbox
+  has no tailnet/SSH route to the old laptop.

@@ -15,9 +15,13 @@ npm run build    # tsc + vite build -> dist/
 
 ## Deploy
 
-`dist/` is built with `base: "/circuit/"` for `https://waterfirst.pro/circuit/`.
-Copy `dist/*` to the `/circuit/` web root. Routes are hash-based
-(`#/` lab, `#/gw7t` report) so no server rewrites are needed.
+Committed `dist/` uses `base: "/circuit-muse/"`. For
+`https://waterfirst.pro/circuit2/` build with
+`npx vite build --base=/circuit2/ --outDir <staging>/circuit2`
+(see `docs/DEPLOY_CIRCUIT2.md` for the full runbook: static copy, backend
+service, nginx `/circuit2/api/` proxy). Routes are hash-based
+(`#/` lab, `#/gw7t` report) so no server rewrites are needed, but the page
+must be served with a trailing slash (`/circuit2/` → static dir).
 
 ## Backend
 

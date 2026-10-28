@@ -1,18 +1,26 @@
 import type { MarginStatus, PassFail, Series, SeriesInfo, SimDesc, StressResult } from "./circuit";
 
 async function post(path: string, body: unknown, timeoutMs: number): Promise<Response> {
-  const ctl = new AbortController();
-  const to = setTimeout(() => ctl.abort(), timeoutMs);
-  try {
-    return await fetch(BACKENDS[0] + path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal: ctl.signal,
-    });
-  } finally {
-    clearTimeout(to);
+  let lastErr: unknown = new Error("no backend");
+  for (const b of BACKENDS) {
+    const ctl = new AbortController();
+    const to = setTimeout(() => ctl.abort(), timeoutMs);
+    try {
+      const r = await fetch(b + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: ctl.signal,
+      });
+      if (r.ok || r.status === 422) return r;
+      lastErr = new Error("backend status " + r.status);
+    } catch (e) {
+      lastErr = e;
+    } finally {
+      clearTimeout(to);
+    }
   }
+  throw lastErr;
 }
 
 export async function postPixel(desc: unknown, timeoutMs = 280000): Promise<SimResponse | null> {
@@ -39,7 +47,25 @@ export async function postPixel(desc: unknown, timeoutMs = 280000): Promise<SimR
   return null;
 }
 
+// Same-origin API first: <page-dir>/api/* is proxied to the sim backend by
+// nginx on public deploys (page must be served with a trailing slash).
+// Localhost fallback keeps `npm run dev` / preview working without a proxy.
+function sameOriginApi(): string | null {
+  try {
+    if (typeof document === "undefined") return null;
+    const u = new URL(".", document.baseURI);
+    if (u.protocol === "http:" || u.protocol === "https:") {
+      return u.href.replace(/\/$/, "");
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+const _sameOrigin = sameOriginApi();
 export const BACKENDS = [
+  ...(_sameOrigin ? [_sameOrigin] : []),
   "http://127.0.0.1:8768",
 ];
 
@@ -79,17 +105,19 @@ export async function postMargin(payload: unknown, timeoutMs = 30000): Promise<M
 }
 
 export async function getMargin(id: string, timeoutMs = 30000): Promise<MarginStatus | null> {
-  try {
-    const ctl = new AbortController();
-    const to = setTimeout(() => ctl.abort(), timeoutMs);
+  for (const b of BACKENDS) {
     try {
-      const r = await fetch(BACKENDS[0] + "/api/margin?id=" + encodeURIComponent(id),
-        { signal: ctl.signal });
-      if (r.ok) return (await r.json()) as MarginStatus;
-    } finally {
-      clearTimeout(to);
-    }
-  } catch { /* unreachable */ }
+      const ctl = new AbortController();
+      const to = setTimeout(() => ctl.abort(), timeoutMs);
+      try {
+        const r = await fetch(b + "/api/margin?id=" + encodeURIComponent(id),
+          { signal: ctl.signal });
+        if (r.ok) return (await r.json()) as MarginStatus;
+      } finally {
+        clearTimeout(to);
+      }
+    } catch { /* next backend */ }
+  }
   return null;
 }
 

@@ -1,5 +1,6 @@
 === SELF-CHECK 2026-10-29 00:19 KST (scripts/self_check.sh) ===
 backend: 21/21 pass (19.2s, OMP_THREAD_LIMIT=1); npm test: 34/34 pass; npm run build: ok; base /circuit-muse/ in dist/index.html
+update 2026-10-29 (deploy prep): npm test 36/36 (+2 same-origin api tests); api.ts BACKENDS now same-origin-first with localhost:8768 fallback; dist/ rebuilt; SELF-CHECK OK re-verified.
 
 === key numbers (each from a saved ngspice run in server/runs/) ===
 EM start->output width: 2H->1.01H (20261029_001935_1cf2bc), 4H->3.01H (20261029_001936_ae6381), 8H->7.01H (20261029_001937_8d8126); all stages exactly one ordered pulse, high>=VGH-1.5V, rest<=-7.5V
