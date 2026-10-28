@@ -46,6 +46,7 @@ sup { font-size: 11px; }
 </head>
 <body>
 <div class="wrap">
+<div style="margin-bottom:8px"><a href="gw7t.html">GW 7T 확정 리포트 (회로도+파형)</a></div>
 <h1>GW Lab - 넷리스트 실험실</h1>
 <p class="note">VGH VGL 해상도 주파수를 고르고 TFT 연결을 적은 뒤 실행을 누르면 서버에서 검증 후 시뮬레이션합니다. 연결이 어긋나면 실행 전에 경고와 수정 제안이 뜹니다. 이 페이지는 서버同一个 로컬 서버에서만 동작합니다.</p>
 
@@ -287,11 +288,13 @@ document.getElementById("run").onclick = async () => {
   if ((j.suggestions||[]).length) document.getElementById("sugs").innerHTML = "수정 제안:<br>" + j.suggestions.map(e=>"&gt; "+e).join("<br>");
   if (!j.ok) { document.getElementById("status").textContent = "중단됨 (위 오류 확인)"; return; }
   document.getElementById("status").textContent = "실제 시뮬 완료 job=" + j.job + " H=" + j.timing.H_us + "us";
-  document.getElementById("summary").textContent = JSON.stringify({summary: j.summary, timing: j.timing, rails: j.rails}, null, 1);
+  document.getElementById("summary").textContent = JSON.stringify({summary: j.summary, margin: j.margin, timing: j.timing, rails: j.rails}, null, 1);
+  window.lastMargin = j.margin || null;
   lastSeries = j.series; lastInfo = j.info;
   drawPlot(j.series, j.info);
   return;
 };
+
 
 function drawPlot(s, info) {
   const cv = document.getElementById("plot");
@@ -307,7 +310,9 @@ function drawPlot(s, info) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, cssW, cssH);
   const t = s.t_us;
-  const t0 = info.T0 - 4, t1 = info.T0 + 32;
+  // normalized window: fixed in H units so freq changes only the axis labels
+  const H = info.H || (info.P ? info.P / 2 : 8);
+  const t0 = info.T0 - 1 * H, t1 = info.T0 + 8 * H;
   let i0 = 0, i1 = t.length - 1;
   for (let i = 0; i < t.length; i++) { if (t[i] < t0) i0 = i; if (t[i] <= t1) i1 = i; }
   ctx.font = "11px sans-serif";
@@ -328,8 +333,28 @@ function drawPlot(s, info) {
     ctx.stroke(); ctx.lineWidth = 1;
     ctx.fillStyle = "#555"; ctx.fillText(mn.toFixed(1) + ".." + mx.toFixed(1), left + 3, y0 + 13);
   });
+  // margin line on OUT lanes
+  const mreq = (window.lastMargin && window.lastMargin.req_low != null) ? window.lastMargin.req_low : null;
+  if (mreq != null) {
+    active.forEach(([key, lab], li) => {
+      if (!lab.startsWith("OUT")) return;
+      const y0 = top + li * laneH;
+      const left = 44, Wd = cssW - left - 8;
+      let mn = 1e9, mx = -1e9;
+      for (let i = i0; i <= i1; i++) { const v = s[key][i]; if (v < mn) mn = v; if (v > mx) mx = v; }
+      if (mx - mn < 0.5) { mn -= 0.25; mx += 0.25; }
+      const y = y0 + 2 + (laneH - 4) * (1 - (mreq - mn) / (mx - mn));
+      if (y >= y0 && y <= y0 + laneH) {
+        ctx.strokeStyle = "#c00"; ctx.setLineDash([4, 3]); ctx.beginPath();
+        ctx.moveTo(left, y); ctx.lineTo(left + Wd, y); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = "#c00"; ctx.fillText("spec " + mreq.toFixed(1), left + Wd - 52, y - 3);
+      }
+    });
+  }
   ctx.fillStyle = "#000";
-  ctx.fillText("시간 " + t0.toFixed(1) + " ~ " + t1.toFixed(1) + " us (프레임1 확대)", 44, cssH - 6);
+  // axis in H units: same shape for every freq, only numbers change
+  const ax0 = ((t0 - info.T0) / H).toFixed(1), ax1 = ((t1 - info.T0) / H).toFixed(1);
+  ctx.fillText("T0+" + ax0 + "H ~ T0+" + ax1 + "H  (" + t0.toFixed(2) + " ~ " + t1.toFixed(2) + " us, H=" + H.toFixed(3) + "us)", 44, cssH - 6);
 }
 window.addEventListener("resize", () => { if (lastSeries) drawPlot(lastSeries, lastInfo); });
 window.addEventListener("orientationchange", () => { setTimeout(() => { if (lastSeries) drawPlot(lastSeries, lastInfo); }, 300); });
