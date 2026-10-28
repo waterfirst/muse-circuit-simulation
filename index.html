@@ -229,7 +229,47 @@ LANES.forEach(([k, lab]) => {
   chipBox.appendChild(b);
 });
 
+const BACKENDS = ["http://100.69.9.76:8766", "http://192.168.45.248:8766", "http://127.0.0.1:8766"];
+async function tryBackend(desc) {
+  for (const b of BACKENDS) {
+    try {
+      const ctl = new AbortController();
+      const to = setTimeout(() => ctl.abort(), 280000);
+      const r = await fetch(b + "/api/sim", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(desc), signal: ctl.signal});
+      clearTimeout(to);
+      if (r.ok || r.status === 422) return await r.json();
+    } catch(e) { /* next backend */ }
+  }
+  return null;
+}
 document.getElementById("run").onclick = async () => {
+  const tft = {};
+  for (const k in rows) if (rows[k].cb.checked) tft[k] = {G: rows[k].sels.G.value, S: rows[k].sels.S.value, D: rows[k].sels.D.value};
+  const desc = {VGH: parseFloat(document.getElementById("vgh").value), VGL: parseFloat(document.getElementById("vgl").value),
+    resolution: parseInt(document.getElementById("res").value), freq_kHz: parseFloat(document.getElementById("freq").value),
+    stages: parseInt(document.getElementById("stages").value), frames: parseInt(document.getElementById("frames").value), tft};
+  document.getElementById("status").textContent = "실행 중... (ngspice)";
+  document.getElementById("errs").textContent = ""; document.getElementById("warns").textContent = "";
+  document.getElementById("sugs").textContent = ""; document.getElementById("summary").textContent = "";
+  const j = await tryBackend(desc);
+  if (!j) {
+    document.getElementById("status").textContent = "노트북 서버에 닿지 않아 검증 파형을 보여줍니다";
+    document.getElementById("warns").textContent = "테일스케일 접속 필요. 노트북 서버가 꺼져 있으면 데모만 표시됩니다.";
+    document.getElementById("summary").textContent = "vC 검증 파형: OUT1 min -9.499 max 9.169, 6단 2프레임, H=4.0us (250kHz)";
+    lastSeries = DEMO_SERIES; lastInfo = DEMO_INFO;
+    drawPlot(DEMO_SERIES, DEMO_INFO);
+    return;
+  }
+  if ((j.errors||[]).length) document.getElementById("errs").innerHTML = "오류:<br>" + j.errors.map(e=>"- "+e).join("<br>");
+  if ((j.warnings||[]).length) document.getElementById("warns").innerHTML = "경고:<br>" + j.warnings.map(e=>"! "+e).join("<br>");
+  if ((j.suggestions||[]).length) document.getElementById("sugs").innerHTML = "수정 제안:<br>" + j.suggestions.map(e=>"&gt; "+e).join("<br>");
+  if (!j.ok) { document.getElementById("status").textContent = "중단됨 (위 오류 확인)"; return; }
+  document.getElementById("status").textContent = "실제 시뮬 완료 job=" + j.job + " H=" + j.timing.H_us + "us";
+  document.getElementById("summary").textContent = JSON.stringify({summary: j.summary, timing: j.timing, rails: j.rails}, null, 1);
+  lastSeries = j.series; lastInfo = j.info;
+  drawPlot(j.series, j.info);
+  return;
+  // ---- old demo-only handler below (unreachable) ----
   document.getElementById("status").textContent = "데모 모드: 서버 없이 검증 파형 표시";
   document.getElementById("errs").textContent = "";
   document.getElementById("warns").textContent = "데모 페이지라 실제 ngspice는 돌지 않습니다. 로컬 서버에서 실행하세요.";
