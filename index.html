@@ -251,7 +251,7 @@ LANES.forEach(([k, lab]) => {
   chipBox.appendChild(b);
 });
 
-const BACKENDS = ["http://100.69.9.76:8766", "http://192.168.45.248:8766", "http://127.0.0.1:8766"];
+const BACKENDS = ["https://murray-voice-julie-attitude.trycloudflare.com", "http://100.69.9.76:8766", "http://192.168.45.248:8766", "http://127.0.0.1:8766"];
 async function tryBackend(desc) {
   for (const b of BACKENDS) {
     try {
@@ -275,7 +275,7 @@ document.getElementById("run").onclick = async () => {
   document.getElementById("sugs").textContent = ""; document.getElementById("summary").textContent = "";
   const j = await tryBackend(desc);
   if (!j) {
-    document.getElementById("status").textContent = "노트북 서버에 닿지 않아 검증 파형을 보여줍니다";
+    document.getElementById("status").textContent = "서버에 닿지 않아 저장된 검증 파형을 보여줍니다 (실시간 시뮬 아님)";
     document.getElementById("warns").textContent = "테일스케일 접속 필요. 노트북 서버가 꺼져 있으면 데모만 표시됩니다.";
     document.getElementById("summary").textContent = "vC 검증 파형: OUT1 min -9.499 max 9.169, 6단 2프레임, H=4.0us (250kHz)";
     lastSeries = DEMO_SERIES; lastInfo = DEMO_INFO;
