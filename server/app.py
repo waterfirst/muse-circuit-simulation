@@ -122,5 +122,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print("gw-react sim on http://127.0.0.1:8768 (Ctrl+C to stop)")
-    HTTPServer(("127.0.0.1", 8768), Handler).serve_forever()
+    import os as _os
+    _host = _os.environ.get("BIND_HOST", "127.0.0.1")
+    print(f"gw-react sim on http://{_host}:8768 (Ctrl+C to stop)")
+    HTTPServer((_host, 8768), Handler).serve_forever()
