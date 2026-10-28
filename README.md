@@ -23,3 +23,16 @@ Copy `dist/*` to the `/circuit/` web root. Routes are hash-based
 
 `POST {base}/api/sim` with the desc JSON (`src/lib/api.ts` `BACKENDS`).
 Without a reachable backend the lab shows the bundled verified demo series.
+
+## Server setup (fresh machine with ngspice + openvaf)
+
+```bash
+python3 -m pip install -r server/requirements.txt
+python3 server/app.py        # 127.0.0.1:8768, localhost only
+python3 -m pytest server/tests/ -q   # 11 tests, needs ngspice (~8 min)
+```
+
+- Decks + descs live in `server/runs/<job>/` (`out.txt` traces regenerate on rerun).
+- Device model `server/ptft_fit.osdi` (POL=1 p-LTPS, POL=-1 n-oxide),
+  prebuilt x86_64 Linux (no `.va` in repo; runs as-is under ngspice).
+- Frontend: `npm install`, `npm test` (34), `npm run build` (base `/circuit-muse/`).

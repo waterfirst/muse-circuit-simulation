@@ -1,6 +1,10 @@
 # Logs
 logs
 *.log
+__pycache__/
+# ngspice outputs are regenerable from job.cir + desc.json (kept)
+server/runs/**/out.txt
+server/runs/**/probe.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

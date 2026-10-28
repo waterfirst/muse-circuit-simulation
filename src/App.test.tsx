@@ -12,12 +12,12 @@ afterEach(() => {
 describe("lab page", () => {
   it("renders header, table, schematic and plot", () => {
     render(<App />);
-    expect(screen.getByText("GW Lab - 넷리스트 실험실")).toBeDefined();
+    expect(screen.getByText("드라이버 Lab — GW / EM / GC / GI")).toBeDefined();
     expect(document.getElementById("tfttab")).toBeDefined();
     expect(document.getElementById("schem")).toBeDefined();
     expect(document.getElementById("plot")).toBeDefined();
-    // 9 TFT rows + header
-    expect(document.querySelectorAll("#tfttab tr")).toHaveLength(10);
+    // 12 TFT rows + header
+    expect(document.querySelectorAll("#tfttab tr")).toHaveLength(13);
   });
   it("loads the VC preset by default", () => {
     render(<App />);
@@ -63,6 +63,26 @@ describe("lab page", () => {
   });
 });
 
+describe("schematic", () => {
+  it("renders 9 FET glyphs with net-colored pins", () => {
+    render(<App />);
+    expect(document.querySelectorAll("#schem .tftnode")).toHaveLength(9);
+    // 9 TFT labels + 2 cap labels
+    expect(document.querySelectorAll("#schem .tftlbl")).toHaveLength(11);
+    // 9 TFTs x 3 pins + 5 rails
+    expect(document.querySelectorAll("#schem g.pin")).toHaveLength(32);
+    const circles = document.querySelectorAll("#schem g.pin circle");
+    const strokes = new Set(Array.from(circles).map((c) => (c as SVGCircleElement).style.stroke));
+    expect(strokes.size).toBeGreaterThan(5);
+  });
+  it("net picker chips carry color edges", () => {
+    render(<App />);
+    const chips = document.querySelectorAll("#netpick .chip");
+    expect(chips).toHaveLength(20);
+    expect((chips[0] as HTMLElement).style.borderLeft).toContain("6px solid");
+  });
+});
+
 describe("report page", () => {
   it("renders on #/gw7t with tables and canvas", () => {
     window.location.hash = "#/gw7t";
@@ -74,6 +94,10 @@ describe("report page", () => {
   });
   it("lab links to the report", () => {
     render(<App />);
-    expect(screen.getByText("GW 7T 확정 리포트 (회로도+파형)").getAttribute("href")).toBe("#/gw7t");
+    expect(screen.getByText("GW 7T 리포트").getAttribute("href")).toBe("#/gw7t");
+  });
+  it("tabs switch to the pixel page", () => {
+    render(<App />);
+    expect(screen.getByText("픽셀 (8T1C)").getAttribute("href")).toBe("#/pixel");
   });
 });

@@ -9,14 +9,12 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 describe("tryBackend", () => {
-  it("tries backends in order until one answers", async () => {
-    const fetch = vi.fn()
-      .mockRejectedValueOnce(new Error("down"))
-      .mockResolvedValueOnce(jsonResponse({ ok: true, job: "j1" }));
+  it("posts to the local backend and returns its reply", async () => {
+    const fetch = vi.fn().mockResolvedValueOnce(jsonResponse({ ok: true, job: "j1" }));
     vi.stubGlobal("fetch", fetch);
     const j = await tryBackend(buildDesc(DEFAULT_PARAMS, presetToMap(VC)), 50);
     expect(j).toEqual({ ok: true, job: "j1" });
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(BACKENDS).toEqual(["http://127.0.0.1:8768"]);
     expect(vi.mocked(fetch).mock.calls[0][0]).toBe(BACKENDS[0] + "/api/sim");
   });
   it("accepts 422 validation replies", async () => {

@@ -1,25 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { BROKEN, DEFAULT_PARAMS, LANES, NETS, TNAMES, VC, axisLabel, buildDesc,
+import { BROKEN, DEFAULT_PARAMS, LANES, NETS, NET_COLOR, VC, axisLabel, buildDesc,
   hinfoText, pinXY, plotWindow, presetToMap, routeNetWires, schemInfoText } from "./circuit";
 
 describe("presets", () => {
   it("VC has 9 TFTs with valid nets", () => {
-    for (const t of TNAMES) {
+    expect(Object.keys(VC)).toHaveLength(9);
+    for (const t of Object.keys(VC)) {
       expect(NETS).toContain(VC[t].G);
       expect(NETS).toContain(VC[t].S);
       expect(NETS).toContain(VC[t].D);
     }
   });
   it("BROKEN differs from VC only at T2.D", () => {
-    for (const t of TNAMES) {
+    for (const t of Object.keys(VC)) {
       if (t === "T2") expect(BROKEN.T2.D).toBe("C");
       else expect(BROKEN[t]).toEqual(VC[t]);
     }
     expect(VC.T2.D).toBe("A");
   });
-  it("presetToMap enables everything", () => {
+  it("presetToMap enables preset TFTs, parks the rest off", () => {
     const m = presetToMap(VC);
-    for (const t of TNAMES) expect(m[t].on).toBe(true);
+    for (const t of Object.keys(VC)) expect(m[t as keyof typeof m].on).toBe(true);
+    expect(m.T10.on).toBe(false);
+    expect(m.T12.on).toBe(false);
   });
 });
 
@@ -31,7 +34,7 @@ describe("buildDesc", () => {
     expect(d.vgh).toBe(8.0);
     expect(d.stages).toBe(6);
     expect(Object.keys(d.tft)).toHaveLength(8);
-    expect(d.tft.T1).toEqual({ G: "CLK1", S: "FLM", D: "B" });
+    expect(d.tft.T1).toEqual({ G: "CLK1", S: "FLM", D: "B", W: 8, L: 4.5, type: "P" });
   });
 });
 
@@ -52,6 +55,15 @@ describe("schematic", () => {
     const { lines, labels } = routeNetWires(presetToMap(VC));
     expect(lines.length).toBeGreaterThan(10);
     expect(labels.some((l) => l.text.startsWith("VGH x"))).toBe(true);
+  });
+  it("every net has its own color", () => {
+    const cols = NETS.map((n) => NET_COLOR[n]);
+    expect(cols.every(Boolean)).toBe(true);
+    expect(new Set(cols).size).toBe(NETS.length);
+  });
+  it("wires use the net color", () => {
+    const { lines } = routeNetWires(presetToMap(VC));
+    expect(lines.every((l) => Object.values(NET_COLOR).includes(l.color) || l.color === "#333")).toBe(true);
   });
   it("info text lists enabled TFTs", () => {
     const t = schemInfoText(presetToMap(VC));

@@ -6,7 +6,7 @@ interface Props {
 }
 
 export default function ParamForm({ params, onChange }: Props) {
-  const set = (k: keyof Params, v: number) => onChange({ ...params, [k]: v });
+  const set = <K extends keyof Params>(k: K, v: Params[K]) => onChange({ ...params, [k]: v });
   return (
     <div className="card">
       <h3>1. 전원 / 타이밍</h3>
@@ -33,8 +33,26 @@ export default function ParamForm({ params, onChange }: Props) {
             onChange={(e) => set("frames", parseInt(e.target.value))}>
             <option value={1}>1</option><option value={2}>2</option><option value={3}>3</option>
           </select></div>
+        <div><label>클럭 모드</label>
+          <select id="clockmode" value={params.clock_mode}
+            onChange={(e) => set("clock_mode", e.target.value as Params["clock_mode"])}>
+            <option value="continuous">continuous (LFD)</option>
+            <option value="burst">burst (scan only)</option>
+          </select></div>
+        <div><label>출력 극성</label>
+          <select id="polarity" value={params.polarity}
+            onChange={(e) => set("polarity", e.target.value as Params["polarity"])}>
+            <option value="low_pulse">low_pulse (GW)</option>
+            <option value="high_pulse">high_pulse (EM/GC/GI)</option>
+          </select></div>
+        <div><label>스타트폭 (H)</label>
+          <input id="startw" type="number" step={0.5} min={0.5} max={16} value={params.start_width_H}
+            onChange={(e) => set("start_width_H", parseFloat(e.target.value))} /></div>
       </div>
-      <p className="note" id="hinfo">{hinfoText(params.freq)}</p>
+      <p className="note" id="hinfo">{hinfoText(params.freq)}
+        {params.polarity === "high_pulse"
+          ? ` / 스타트: VGL 휴지 → VGH ${params.start_width_H}H 펄스`
+          : " / 스타트: VGH 휴지 → VGL 펄스"}</p>
     </div>
   );
 }

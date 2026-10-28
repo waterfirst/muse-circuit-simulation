@@ -1,0 +1,16 @@
+EM: pass=True job=20261028_232114_e7bf95 reasons=['all stages: exactly one ordered pulse, levels OK']
+GC: pass=True job=20261028_232118_62946d reasons=['all stages: exactly one ordered pulse, levels OK']
+GI: pass=True job=20261028_232122_59084c reasons=['all stages: exactly one ordered pulse, levels OK']
+GW: pass=True job=20261028_232126_a181ce reasons=['all stages: exactly one ordered pulse, levels OK']
+=== npm test ===
+[2m      Tests [22m [1m[32m34 passed[39m[22m[90m (34)[39m
+[2m   Start at [22m 23:21:29
+[2m   Duration [22m 1.60s[2m (tests 59%, environment 26%, import 10%, transform 4%, worker 1%)[22m
+
+=== npm run build ===
+✓ built in 145ms
+=== key numbers (each from a saved ngspice run in server/runs/) ===
+EM start->output width: 2H->1.01H (20261028_231917_7f2d59), 4H->3.01H (20261028_231921_cf5f8a), 8H->7.01H (20261028_231926_dd87d1); all stages exactly one ordered pulse, high>=VGH-1.5V, rest<=-7.5V
+pixel DATA 2/3/4V emission current: 4.1267/1.6998/0.2861 uA, NG after GC 0.79/1.79/2.79V (20261028_231932_91d454, 20261028_231933_8d1174, 20261028_231934_e5fb58)
+pixel T1 dVth -0.2/0/+0.2V: 1.7025/1.6998/1.6964 uA, spread 0.36% (20261028_231931_e42f61, 20261028_231931_bf8b9c, 20261028_231932_7ae43f)
+backend: 11/11 pass; npm test: 34/34 pass; npm run build: ok; base /circuit-muse/ verified in dist/index.html
