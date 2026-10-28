@@ -1,0 +1,44 @@
+:root { --bd: #ddd; --mut: #555; --err: #a00; --warn: #8a5a00; --ok: #064; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 12px; background: #f6f6f6; color: #111; }
+.wrap { max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 19px; margin: 4px 0 8px; }
+h2 { margin: 4px 0 8px; font-size: 18px; }
+h3 { margin: 4px 0 8px; }
+.card { background: #fff; border: 1px solid var(--bd); border-radius: 10px; padding: 12px; margin: 10px 0; }
+.row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.row > div { min-width: 0; }
+label { font-size: 12px; color: var(--mut); display: block; margin-bottom: 2px; }
+input, select { font-size: 15px; padding: 8px 6px; width: 100%; border: 1px solid var(--bd); border-radius: 6px; background: #fff; }
+button { font-size: 16px; padding: 10px 16px; cursor: pointer; border-radius: 8px; border: 1px solid #bbb; background: #fff; margin: 4px 4px 4px 0; }
+button.primary { background: #111; color: #fff; border-color: #111; }
+button:disabled { opacity: 0.5; cursor: default; }
+table { border-collapse: collapse; font-size: 13px; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px 4px; text-align: center; }
+th { background: #eee; }
+td select { font-size: 14px; padding: 6px 2px; border: none; background: transparent; width: 100%; }
+#warns { color: var(--warn); } #errs { color: var(--err); } #sugs { color: var(--ok); }
+.msg { font-size: 14px; line-height: 1.5; margin: 6px 0; }
+canvas.plot { width: 100%; height: auto; display: block; background: #fff; border: 1px solid #ccc; border-radius: 6px; touch-action: pan-x pan-y; }
+canvas#plot { width: 100%; display: block; background: #fff; border: 1px solid #ccc; border-radius: 6px; }
+pre { white-space: pre-wrap; font-size: 12px; background: #fafafa; padding: 8px; border: 1px solid var(--bd); border-radius: 6px; overflow-x: auto; }
+.note { font-size: 12px; color: var(--mut); line-height: 1.5; }
+#schem { width: 100%; height: auto; display: block; background: #fff; border: 1px solid #ccc; border-radius: 6px; touch-action: pan-x pan-y; }
+.tftnode { cursor: pointer; }
+.tftnode circle { fill: #fff; stroke: #111; stroke-width: 1.6; }
+.tftnode text { font-size: 11px; text-anchor: middle; dominant-baseline: central; }
+.pin { cursor: pointer; }
+.pin circle { fill: #fff; stroke: #333; stroke-width: 1.2; }
+.pin text { font-size: 9px; text-anchor: middle; }
+.pin.sel circle { fill: #111; }
+.pin.sel text { fill: #fff; }
+.wire { stroke: #090; stroke-width: 1.4; fill: none; }
+.netlbl { font-size: 10px; fill: #333; }
+sup { font-size: 11px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; -webkit-overflow-scrolling: touch; }
+.chip { flex: 0 0 auto; font-size: 13px; border: 1px solid var(--bd); border-radius: 16px; padding: 6px 10px; background: #fff; }
+.chip.on { background: #111; color: #fff; border-color: #111; }
+svg.schem { width: 100%; height: auto; background: #fff; border: 1px solid #ccc; border-radius: 6px; }
+.tft { fill: #fff; stroke: #111; stroke-width: 1.6; }
+.pass { color: #060; font-weight: bold; } .fail { color: #c00; font-weight: bold; }
+@media (min-width: 760px) { .row { grid-template-columns: repeat(6, 1fr); } }
