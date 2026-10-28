@@ -1,4 +1,5 @@
-import { NETS, TNAMES, type Net, type Pin, type TName, type TftMap } from "../lib/circuit";
+import { DEG_FRESH, NETS, TNAMES, type DegKey, type Net, type Pin, type TName, type TftMap } from "../lib/circuit";
+import { DEG_HL } from "./Aging";
 
 interface Props {
   tft: TftMap;
@@ -6,14 +7,18 @@ interface Props {
   onToggle: (t: TName, on: boolean) => void;
   onSize: (t: TName, k: "W" | "L", v: number) => void;
   onType: (t: TName, ty: "P" | "N") => void;
+  onDeg: (t: TName, k: DegKey, v: number) => void;
 }
 
-export default function TftTable({ tft, onChange, onToggle, onSize, onType }: Props) {
+const DEG_KEYS: DegKey[] = ["dVth", "ion", "ioff", "ss"];
+
+export default function TftTable({ tft, onChange, onToggle, onSize, onType, onDeg }: Props) {
   return (
     <div style={{ overflowX: "auto" }}>
     <table id="tfttab">
       <tbody>
-        <tr><th>TFT</th><th>G</th><th>S</th><th>D</th><th>W(um)</th><th>L(um)</th><th>P/N</th><th>사용</th></tr>
+        <tr><th>TFT</th><th>G</th><th>S</th><th>D</th><th>W(um)</th><th>L(um)</th><th>P/N</th>
+          <th>ΔVth</th><th>Ion×</th><th>Ioff×</th><th>SS×</th><th>사용</th></tr>
         {TNAMES.map((t) => (
           <tr key={t} style={tft[t].on ? undefined : { opacity: 0.45 }}>
             <td>{t}</td>
@@ -33,6 +38,16 @@ export default function TftTable({ tft, onChange, onToggle, onSize, onType }: Pr
               onChange={(e) => onType(t, e.target.value as "P" | "N")}>
               <option value="P">P</option><option value="N">N</option>
             </select></td>
+            {DEG_KEYS.map((k) => {
+              const v = tft[t][k] ?? DEG_FRESH[k];
+              const stale = v !== DEG_FRESH[k];
+              return (
+                <td key={k} style={stale ? DEG_HL : undefined}>
+                  <input type="number" step={k === "dVth" ? 0.1 : 0.05} style={{ width: 62 }}
+                    value={v} onChange={(e) => onDeg(t, k, parseFloat(e.target.value))} />
+                </td>
+              );
+            })}
             <td>
               <input type="checkbox" checked={tft[t].on}
                 onChange={(e) => onToggle(t, e.target.checked)} />

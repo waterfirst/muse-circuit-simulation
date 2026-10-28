@@ -10,7 +10,8 @@ interface Props {
 }
 
 /** FET glyph: PMOS gets a gate bubble, NMOS none; arrow on S stub. */
-export function FetGlyph({ t, cx, cy, ptype }: { t: string; cx: number; cy: number; ptype: "P" | "N" }) {
+export function FetGlyph({ t, cx, cy, ptype, wl }: {
+  t: string; cx: number; cy: number; ptype: "P" | "N"; wl?: string }) {
   const isP = ptype !== "N";
   return (
     <g className="tftnode">
@@ -23,6 +24,7 @@ export function FetGlyph({ t, cx, cy, ptype }: { t: string; cx: number; cy: numb
         ? <polygon points={`${cx - 9},${cy + 2} ${cx - 12.5},${cy + 9} ${cx - 5.5},${cy + 9}`} fill="#111" />
         : <polygon points={`${cx - 9},${cy + 9} ${cx - 12.5},${cy + 2} ${cx - 5.5},${cy + 2}`} fill="#111" />}
       <text x={cx - 19} y={cy - 17} className="tftlbl">{t}</text>
+      {wl && <text x={cx + 14} y={cy + 24} className="netlbl">{wl}</text>}
     </g>
   );
 }
@@ -76,7 +78,8 @@ export default function SchemEditor({ tft, caps, pickedNet, onPickNet, onPinClic
         const [cx, cy] = SCHEM_POS[t];
         return (
           <g key={t}>
-            <FetGlyph t={t} cx={cx} cy={cy} ptype={tft[t].type || "P"} />
+            <FetGlyph t={t} cx={cx} cy={cy} ptype={tft[t].type || "P"}
+              wl={`${tft[t].W ?? 4}/${tft[t].L ?? 4.5}`} />
             {(["G","S","D"] as Pin[]).map((pin) => {
               const [px, py] = pinXY(t, pin);
               const net = tft[t][pin];

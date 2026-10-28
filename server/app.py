@@ -5,11 +5,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
+import backend
 from backend import run_job
 from presets import DRIVER_DEFAULTS, PIXEL_DEFAULTS, PIXEL_TFT
+import aging
 
 HERE = Path(__file__).resolve().parent
-_SIM_LOCK = _th.Semaphore(1)
+_SIM_LOCK = backend.SIM_LOCK
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -43,6 +45,18 @@ class Handler(BaseHTTPRequestHandler):
                           "tft": v["tft"], "caps": v["caps"]}
             out["PIXEL"] = {"defaults": PIXEL_DEFAULTS, "tft": PIXEL_TFT}
             self._send(200, out)
+        elif u.path == "/api/margin":
+            from urllib.parse import parse_qs
+            q = parse_qs(u.query)
+            jid = (q.get("id") or [""])[0]
+            if not jid or ".." in jid or "/" in jid:
+                self._send(400, {"error": "need ?id=<margin_job>"})
+                return
+            snap = aging.margin_status(jid)
+            if snap is None:
+                self._send(404, {"error": "unknown margin job"})
+            else:
+                self._send(200, snap)
         elif u.path.startswith("/runs/"):
             # serve saved deck/log/trace: /runs/<job>/<file>
             parts = u.path[len("/runs/"):].split("/")
@@ -60,7 +74,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, {"error": "not found"})
 
     def do_POST(self):
-        if self.path not in ("/api/sim", "/api/pixel"):
+        if self.path not in ("/api/sim", "/api/pixel", "/api/stress",
+                             "/api/margin"):
             self._send(404, {"error": "not found"})
             return
         try:
@@ -73,13 +88,26 @@ class Handler(BaseHTTPRequestHandler):
             self._send(400, {"ok": False, "errors": ["invalid JSON body"],
                              "warnings": [], "suggestions": []})
             return
+        if self.path == "/api/margin":
+            # background job: returns immediately, poll via GET
+            try:
+                result = aging.start_margin(desc)
+            except Exception as exc:
+                self._send(500, {"ok": False,
+                                 "errors": [f"backend error: {type(exc).__name__}"]})
+                return
+            self._send(202 if result.get("ok") else 422, result)
+            return
         if not _SIM_LOCK.acquire(blocking=False):
             self._send(429, {"ok": False, "errors": ["another simulation is running"],
                              "warnings": [], "suggestions": []})
             return
         try:
             try:
-                result = run_job(desc)
+                if self.path == "/api/stress":
+                    result = aging.run_stress(desc)
+                else:
+                    result = run_job(desc)
             except Exception as exc:
                 self._send(500, {"ok": False,
                                  "errors": [f"backend error: {type(exc).__name__}"],

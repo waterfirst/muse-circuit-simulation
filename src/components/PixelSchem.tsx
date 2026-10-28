@@ -79,7 +79,8 @@ export default function PixelSchem({ tft, cst, coled }: { tft: PTftMap; cst: num
         const [cx, cy] = PIXEL_POS[t];
         return (
           <g key={t}>
-            <FetGlyph t={`${t}(${tft[t].type})`} cx={cx} cy={cy} ptype={tft[t].type} />
+            <FetGlyph t={`${t}(${tft[t].type})`} cx={cx} cy={cy} ptype={tft[t].type}
+              wl={`${tft[t].W}/${tft[t].L}`} />
             {(["G", "S", "D"] as Pin[]).map((pin) => {
               const [px, py] = pinXY(t, pin);
               const net = tft[t][pin] as string;

@@ -43,6 +43,20 @@ class TestValidation(unittest.TestCase):
         self.assertFalse(r.get("ok"))
         self.assertEqual(_job_count(), n0)
 
+    def test_degradation_temp_range(self):
+        n0 = _job_count()
+        bad_tft = {"T1": {"G": "CLK1", "S": "FLM", "D": "B", "dVth": 9.9}}
+        r = backend.run_job({"kind": "driver", "preset": "GW",
+                             "tft": bad_tft})
+        self.assertFalse(r.get("ok"))
+        r = backend.run_job({"kind": "driver", "preset": "GW", "temp_C": 999,
+                             "tft": {"T1": {"G": "CLK1", "S": "FLM",
+                                             "D": "B"}}})
+        self.assertFalse(r.get("ok"))
+        r = backend.run_pixel({"kind": "pixel", "temp_C": "25;evil"})
+        self.assertFalse(r.get("ok"))
+        self.assertEqual(_job_count(), n0, "no job dir may be created")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

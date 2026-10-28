@@ -5,6 +5,7 @@ import { DEFAULT_PIXEL, DEFAULT_PTFT, PIXEL_LANES, P_NETS, P_TFTS,
 import { postPixel } from "../lib/api";
 import WavePlot from "../components/WavePlot";
 import PixelSchem from "../components/PixelSchem";
+import { DEG_HL, MarginPanel, StressPanel } from "../components/Aging";
 
 type Sig = "GI" | "GC" | "GW" | "EM" | "GO";
 const SIGS: Sig[] = ["GI", "GC", "GW", "EM", "GO"];
@@ -115,6 +116,7 @@ export default function PixelPage() {
           {num("C_OLED (pF)", p.Coled_pf, (v) => set("Coled_pf", v))}
           {num("P VT0 (V)", p.VT0_P, (v) => set("VT0_P", v))}
           {num("N VT0 (V)", p.VT0_N, (v) => set("VT0_N", v))}
+          {num("온도 (°C)", p.temp_C, (v) => set("temp_C", v), 1)}
         </div>
         <table><tbody>
           <tr><th>신호</th><th>시작 (us)</th><th>끝 (us)</th><th>극성</th></tr>
@@ -134,9 +136,10 @@ export default function PixelPage() {
         <p className="note">배선·단자 라벨은 아래 TFT 표에서 직접 그리므로 넷리스트와 항상 일치합니다.</p>
       </div>
       <div className="card">
-        <h3>3. TFT (타입/G/S/D/W/L/ΔVth)</h3>
+        <h3>3. TFT (타입/G/S/D/W/L/ΔVth/Ion/Ioff/SS)</h3>
         <div style={{ overflowX: "auto" }}><table><tbody>
-          <tr><th>TFT</th><th>타입</th><th>G</th><th>S</th><th>D</th><th>W</th><th>L</th><th>ΔVth</th></tr>
+          <tr><th>TFT</th><th>타입</th><th>G</th><th>S</th><th>D</th><th>W</th><th>L</th>
+            <th>ΔVth</th><th>Ion×</th><th>Ioff×</th><th>SS×</th></tr>
           {P_TFTS.map((t: PTft) => (
             <tr key={t}><td>{t}</td>
               <td><select value={tft[t].type}
@@ -151,11 +154,19 @@ export default function PixelPage() {
                 onChange={(e) => setTft((p) => ({ ...p, [t]: { ...p[t], W: parseFloat(e.target.value) } }))} /></td>
               <td><input type="number" step={0.5} style={{ width: 60 }} value={tft[t].L}
                 onChange={(e) => setTft((p) => ({ ...p, [t]: { ...p[t], L: parseFloat(e.target.value) } }))} /></td>
-              <td><input type="number" step={0.1} style={{ width: 64 }} value={tft[t].dVth}
-                onChange={(e) => setTft((p) => ({ ...p, [t]: { ...p[t], dVth: parseFloat(e.target.value) } }))} /></td>
+              <td style={tft[t].dVth !== 0 ? DEG_HL : undefined}>
+                <input type="number" step={0.1} style={{ width: 64 }} value={tft[t].dVth}
+                  onChange={(e) => setTft((p) => ({ ...p, [t]: { ...p[t], dVth: parseFloat(e.target.value) } }))} /></td>
+              {(["ion", "ioff", "ss"] as const).map((k) => (
+                <td key={k} style={tft[t][k] !== 1 ? DEG_HL : undefined}>
+                  <input type="number" step={0.05} style={{ width: 62 }} value={tft[t][k]}
+                    onChange={(e) => setTft((p) => ({ ...p, [t]: { ...p[t], [k]: parseFloat(e.target.value) } }))} />
+                </td>
+              ))}
             </tr>
           ))}
         </tbody></table></div>
+        <p className="note">fresh(0/1/1/1)와 다른 열화 셀은 노란색.</p>
       </div>
       <div className="card">
         <h3>4. 실행</h3>
@@ -183,6 +194,21 @@ export default function PixelPage() {
           </div>
         )}
       </div>
+      <StressPanel
+        getDesc={() => buildDesc(p.DATA, tft.T1.dVth) as unknown as Record<string, unknown>}
+        onApply={(rows) => setTft((prev) => {
+          const n = { ...prev };
+          for (const r of rows) {
+            const t = r.tft as PTft;
+            if (n[t]) n[t] = { ...n[t],
+              dVth: Math.max(-2, Math.min(2, r.dVth)),
+              ion: r.ion, ioff: r.ioff, ss: r.ss };
+          }
+          return n;
+        })} />
+      <MarginPanel
+        getDesc={() => buildDesc(p.DATA, tft.T1.dVth) as unknown as Record<string, unknown>}
+        kind="pixel" />
       {series && info && (
         <WavePlot series={series} info={info} enabled={enabled} lanes={PIXEL_LANES}
           title="5. 파형 (frame2, 제어/노드/OLED전류)"

@@ -48,6 +48,9 @@ export default function ParamForm({ params, onChange }: Props) {
         <div><label>스타트폭 (H)</label>
           <input id="startw" type="number" step={0.5} min={0.5} max={16} value={params.start_width_H}
             onChange={(e) => set("start_width_H", parseFloat(e.target.value))} /></div>
+        <div><label>온도 (°C)</label>
+          <input id="temp" type="number" step={1} value={params.temp_C}
+            onChange={(e) => set("temp_C", parseFloat(e.target.value))} /></div>
       </div>
       <p className="note" id="hinfo">{hinfoText(params.freq)}
         {params.polarity === "high_pulse"

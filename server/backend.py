@@ -4,12 +4,70 @@
 Strict JSON in -> validated netlist -> ngspice (ptft_fit.osdi) ->
 downsampled waveforms + pass/fail. All work in server/runs/<job>/.
 """
-import json, os, re, subprocess, time, uuid
+import json, os, re, subprocess, threading, time, uuid
 import numpy as np
+
+# Serializes ngspice runs (interactive sims + margin workers share it).
+SIM_LOCK = threading.Semaphore(1)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RUNS = os.path.join(HERE, "runs")
 os.makedirs(RUNS, exist_ok=True)
+
+# Tool paths configurable for portability (§7).
+NGSPICE_BIN = os.environ.get("NGSPICE_BIN", "ngspice")
+OSDI_PATH = os.environ.get("OSDI_PATH", os.path.join(HERE, "ptft_fit.osdi"))
+
+# ---- model-parameter mapping (synthetic assumptions, see docs/ASSUMPTIONS.md) ----
+# ptft_fit.va has NO temperature term ($vt fixed at 300.15K), so temperature is
+# applied here. Deck defaults reproduce the old cards exactly at 25C fresh.
+U0_BASE = 65.0
+SS_BASE = 0.30
+GOFF_BASE = 1e-14
+TEMP_RANGE = (-40.0, 125.0)
+VTH_TEMPCO = -0.004    # V/C: |Vth| falls with T (P and N)
+MU_TEMPCO_P = -0.002   # /C: LTPS mobility falls slightly with T
+MU_TEMPCO_N = 0.001    # /C: oxide mobility rises slightly with T
+GOFF_T60 = 60.0        # C per x10 off-current (operator: x10 from 25C to 85C)
+
+
+def eff_params(vt0_base, dvth, ion, ioff, ss, pol, temp_c):
+    """Fresh/degraded params + temperature -> effective ptft_fit card values."""
+    dT = temp_c - 25.0
+    mu_tc = MU_TEMPCO_P if pol > 0 else MU_TEMPCO_N
+    return {
+        "VT0": vt0_base + dvth + VTH_TEMPCO * dT,
+        "U0": U0_BASE * ion * (1.0 + mu_tc * dT),
+        "SS": SS_BASE * ss * (temp_c + 273.15) / 298.15,
+        "GOFF": GOFF_BASE * ioff * (10.0 ** (dT / GOFF_T60)),
+    }
+
+
+def _deg(pins, errors, tag):
+    """Parse per-TFT degradation inputs. Returns dict or None."""
+    dv = _num(pins.get("dVth", 0.0))
+    if dv is None or not (-2 <= dv <= 2):
+        errors.append(f"{tag}.dVth {pins.get('dVth')!r}: must be -2..2 V")
+        dv = 0.0
+    out = {"dVth": dv}
+    for key, lo, hi in (("ion", 0.1, 2.0), ("ioff", 0.1, 100.0),
+                        ("ss", 0.5, 3.0)):
+        v = _num(pins.get(key, 1.0))
+        if v is None or not (lo <= v <= hi):
+            errors.append(f"{tag}.{key} {pins.get(key)!r}: must be {lo}..{hi}")
+            v = 1.0
+        out[key] = v
+    return out
+
+
+def _temp_c(desc, errors):
+    t = _num(_get(desc, "temp_C", "temp", default=25.0))
+    if t is None:
+        errors.append("temp_C must be a number")
+        return 25.0
+    if not (TEMP_RANGE[0] <= t <= TEMP_RANGE[1]):
+        errors.append(f"temp_C {t} out of range {TEMP_RANGE[0]}..{TEMP_RANGE[1]}")
+    return t
 
 from presets import DRIVER_DEFAULTS, PIXEL_DEFAULTS, PIXEL_TFT  # noqa: E402
 
@@ -172,9 +230,10 @@ def validate_driver(desc):
         if vt0 is None or not (0.2 <= vt0 <= 5):
             errors.append(f"{name}.VT0 {pins.get('VT0')!r}: must be 0.2..5")
             vt0 = 1.1
+        dg = _deg(pins, errors, name)
         if w and l:
             tft[name] = {"G": pins["G"], "S": pins["S"], "D": pins["D"],
-                         "W": w, "L": l, "POL": pol, "VT0": vt0}
+                         "W": w, "L": l, "POL": pol, "VT0": vt0, **dg}
     caps_in = _get(desc, "caps")
     if caps_in is None:
         caps_in = dflt["caps"]
@@ -202,6 +261,7 @@ def validate_driver(desc):
     cl = _num(_get(desc, "cload_pf", default=1.0))
     if cl is None or not (0 <= cl <= 100):
         errors.append(f"cload_pf {cl!r}: must be 0..100 pF")
+    temp_c = _temp_c(desc, errors)
 
     if errors:
         return errors, warnings, suggestions, {}
@@ -211,6 +271,7 @@ def validate_driver(desc):
             "clock_mode": clock_mode, "polarity": polarity,
             "start_width_H": start_w, "margin_V": margin,
             "rest_spec_V": rest_spec, "width_tol_H": width_tol,
+            "temp_C": temp_c,
             "H": H, "tft": tft, "caps": caps, "cload_pf": cl}
     return errors, warnings, suggestions, norm
 
@@ -287,8 +348,11 @@ def build_driver_cir(norm, jobdir):
          f"pol={norm['polarity']} W={W}H"]
     for name in sorted(tft, key=lambda t: int(t[1:])):
         p = tft[name]
+        e = eff_params(p["VT0"], p["dVth"], p["ion"], p["ioff"], p["ss"],
+                       p["POL"], norm["temp_C"])
         L.append(f".model m{name} ptft_fit W={p['W']} L={p['L']} "
-                 f"VT0={p['VT0']:.3f} U0=65.00 POL={p['POL']}")
+                 f"VT0={e['VT0']:.4f} U0={e['U0']:.3f} POL={p['POL']} "
+                 f"SS={e['SS']:.4f} GOFF={e['GOFF']:.3e}")
     L.append(".subckt gstage IN CKA CKB OUT VGH VGL")
     for name in sorted(tft, key=lambda t: int(t[1:])):
         p = tft[name]
@@ -434,16 +498,21 @@ def driver_passfail(arr, header, norm, info):
 
 
 def _run_ngspice(jobdir, cir):
+    link = os.path.join(jobdir, "ptft_fit.osdi")
     try:
-        os.symlink(os.path.join(HERE, "ptft_fit.osdi"),
-                   os.path.join(jobdir, "ptft_fit.osdi"))
+        if os.path.abspath(OSDI_PATH) != os.path.abspath(link):
+            os.symlink(OSDI_PATH, link)
     except FileExistsError:
         pass
+    # Perf (§0.8): Ubuntu ngspice-45.2 spawns 8 OpenMP threads per run
+    # (ignores OMP_NUM_THREADS), burning ~31s CPU for a 4s sim and
+    # collapsing under parallel load. OMP_THREAD_LIMIT=1 -> ~1s per sim,
+    # 4x parallel all ~1s. Operator may override via env.
+    env = {k: v for k, v in os.environ.items() if "KEY" not in k.upper()}
+    env.setdefault("OMP_THREAD_LIMIT", "1")
     try:
-        proc = subprocess.run(["ngspice", "-b", cir], capture_output=True,
-                              text=True, timeout=300, cwd=jobdir,
-                              env={k: v for k, v in os.environ.items()
-                                   if "KEY" not in k.upper()})
+        proc = subprocess.run([NGSPICE_BIN, "-b", cir], capture_output=True,
+                              text=True, timeout=300, cwd=jobdir, env=env)
     except (OSError, subprocess.SubprocessError) as exc:
         return None, f"ngspice launch failed: {type(exc).__name__}"
     open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
@@ -496,7 +565,8 @@ def run_driver(desc):
                        "freq_kHz": norm["freq_kHz"],
                        "polarity": norm["polarity"],
                        "clock_mode": norm["clock_mode"],
-                       "start_width_H": norm["start_width_H"]},
+                       "start_width_H": norm["start_width_H"],
+                       "temp_C": norm["temp_C"]},
             "cir": open(cir).read()}
 
 
@@ -577,13 +647,11 @@ def validate_pixel(desc):
         if typ not in ("P", "N"):
             errors.append(f"{name}.type {typ!r}: must be 'P' or 'N'")
             typ = "P"
-        dv = _num(pins.get("dVth", 0.0))
-        if dv is None or not (-2 <= dv <= 2):
-            errors.append(f"{name}.dVth {pins.get('dVth')!r}: must be -2..2 V")
-            dv = 0.0
+        dg = _deg(pins, errors, name)
         if w and l:
             tft[name] = {"type": typ, "G": pins["G"], "S": pins["S"],
-                         "D": pins["D"], "W": w, "L": l, "dVth": dv}
+                         "D": pins["D"], "W": w, "L": l, **dg}
+    g["temp_C"] = _temp_c(desc, errors)
     if errors:
         return errors, warnings, {}
     g["timing"], g["tft"], g["frame_us"] = timing, tft, frame_us
@@ -597,10 +665,13 @@ def build_pixel_cir(g, jobdir):
     L = [f"* gw-react 8T1C pixel DATA={g['DATA']} frame={F:.0f}us"]
     for name in sorted(g["tft"], key=lambda t: int(t[1:])):
         p = g["tft"][name]
-        vt0 = (g["VT0_P"] if p["type"] == "P" else g["VT0_N"]) + p["dVth"]
+        fresh = g["VT0_P"] if p["type"] == "P" else g["VT0_N"]
         pol = 1 if p["type"] == "P" else -1
+        e = eff_params(fresh, p["dVth"], p["ion"], p["ioff"], p["ss"],
+                       pol, g["temp_C"])
         L.append(f".model m{name} ptft_fit W={p['W']} L={p['L']} "
-                 f"VT0={vt0:.3f} U0=65.00 POL={pol}")
+                 f"VT0={e['VT0']:.4f} U0={e['U0']:.3f} POL={pol} "
+                 f"SS={e['SS']:.4f} GOFF={e['GOFF']:.3e}")
         L.append(f"N_{name} {p['D']} {p['G']} {p['S']} m{name}")
     L += [f"Cst NG ELVDD {g['Cst_pf']}p",
           f"Coled ANODE ELVSS {g['Coled_pf']}p",
@@ -679,7 +750,7 @@ def run_pixel(desc):
             "result": {"i_emission_uA": round(i_em * 1e6, 4),
                        "i_frame_avg_uA": round(i_avg * 1e6, 4),
                        "ng_after_gc_V": round(ng_after_gc, 4),
-                       "data_V": g["DATA"]},
+                       "data_V": g["DATA"], "temp_C": g["temp_C"]},
             "series": series, "cir": open(cir).read()}
 
 

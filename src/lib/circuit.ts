@@ -10,7 +10,14 @@ export const TNAMES: TName[] =
 export interface TftConn {
   G: Net; S: Net; D: Net; on: boolean;
   W?: number; L?: number; type?: "P" | "N";
+  dVth?: number; ion?: number; ioff?: number; ss?: number;
 }
+export type DegKey = "dVth" | "ion" | "ioff" | "ss";
+export const DEG_FRESH: Record<DegKey, number> =
+  { dVth: 0, ion: 1, ioff: 1, ss: 1 };
+export const isFreshDeg = (t: { dVth?: number; ion?: number; ioff?: number; ss?: number }) =>
+  (t.dVth ?? 0) === 0 && (t.ion ?? 1) === 1 &&
+  (t.ioff ?? 1) === 1 && (t.ss ?? 1) === 1;
 export type TftMap = Record<TName, TftConn>;
 export interface CapConn { a: Net; b: Net; pf: number; name: string; on: boolean }
 
@@ -72,14 +79,16 @@ export interface Params {
   clock_mode: "continuous" | "burst";
   polarity: "low_pulse" | "high_pulse";
   start_width_H: number;
+  temp_C: number;
 }
 export const DEFAULT_PARAMS: Params =
   { vgh: 8.0, vgl: -9.5, res: 2160, freq: 250, stages: 6, frames: 2,
-    clock_mode: "continuous", polarity: "low_pulse", start_width_H: 1 };
+    clock_mode: "continuous", polarity: "low_pulse", start_width_H: 1, temp_C: 25 };
 
 export interface SimDesc extends Params {
   preset: PresetName;
-  tft: Record<string, { G: Net; S: Net; D: Net; W?: number; L?: number; type?: string }>;
+  tft: Record<string, { G: Net; S: Net; D: Net; W?: number; L?: number; type?: string;
+    dVth?: number; ion?: number; ioff?: number; ss?: number }>;
   caps: { a: Net; b: Net; pf: number; name: string }[];
 }
 
@@ -97,10 +106,17 @@ export function presetToMap(p: Record<string, { G: Net; S: Net; D: Net }>): TftM
 export function buildDesc(params: Params, tft: TftMap, preset: PresetName = "GW",
     caps: CapConn[] = []): SimDesc {
   const ts = {} as SimDesc["tft"];
-  for (const t of TNAMES)
-    if (tft[t].on)
-      ts[t] = { G: tft[t].G, S: tft[t].S, D: tft[t].D,
-        W: tft[t].W, L: tft[t].L, type: tft[t].type || "P" };
+  for (const t of TNAMES) {
+    if (!tft[t].on) continue;
+    const e: SimDesc["tft"][string] = { G: tft[t].G, S: tft[t].S, D: tft[t].D,
+      W: tft[t].W, L: tft[t].L, type: tft[t].type || "P" };
+    // degradation keys only when non-fresh (keeps descs + old tests stable)
+    if ((tft[t].dVth ?? 0) !== 0) e.dVth = tft[t].dVth;
+    if ((tft[t].ion ?? 1) !== 1) e.ion = tft[t].ion;
+    if ((tft[t].ioff ?? 1) !== 1) e.ioff = tft[t].ioff;
+    if ((tft[t].ss ?? 1) !== 1) e.ss = tft[t].ss;
+    ts[t] = e;
+  }
   return { ...params, preset, tft: ts,
     caps: caps.filter((c) => c.on).map((c) => ({ a: c.a, b: c.b, pf: c.pf, name: c.name })) };
 }
@@ -227,30 +243,57 @@ export const P_NETS = ["ELVDD","ELVSS","VINT","VOBS","DATA","VGH","VGL",
 export type PNet = (typeof P_NETS)[number];
 export type PTft = `T${1|2|3|4|5|6|7|8}`;
 export const P_TFTS: PTft[] = ["T1","T2","T3","T4","T5","T6","T7","T8"];
-export interface PTftConn { type: "P" | "N"; G: PNet; S: PNet; D: PNet; W: number; L: number; dVth: number }
+export interface PTftConn { type: "P" | "N"; G: PNet; S: PNet; D: PNet; W: number; L: number;
+  dVth: number; ion: number; ioff: number; ss: number }
 export type PTftMap = Record<PTft, PTftConn>;
 export interface PixelParams {
   ELVDD: number; ELVSS: number; VINT: number; VOBS: number; DATA: number;
   VGH: number; VGL: number; frame_hz: number; Cst_pf: number; Coled_pf: number;
-  VT0_P: number; VT0_N: number;
+  VT0_P: number; VT0_N: number; temp_C: number;
   timing: Record<"GI"|"GC"|"GW"|"EM"|"GO", [number, number]>;
 }
 export const DEFAULT_PIXEL: PixelParams = {
   ELVDD: 4.6, ELVSS: 0, VINT: -2, VOBS: 5, DATA: 3,
   VGH: 8, VGL: -9.5, frame_hz: 120, Cst_pf: 0.2, Coled_pf: 1.0,
-  VT0_P: 1.1, VT0_N: 1.1,
+  VT0_P: 1.1, VT0_N: 1.1, temp_C: 25,
   timing: { GI: [0, 30], GO: [40, 70], GW: [80, 110], GC: [80, 110], EM: [150, 8300] },
 };
+const _pfresh = { dVth: 0, ion: 1, ioff: 1, ss: 1 };
 export const DEFAULT_PTFT: PTftMap = {
-  T1: { type: "P", G: "NG", S: "NS", D: "ND", W: 3, L: 6, dVth: 0 },
-  T2: { type: "P", G: "GW", S: "DATA", D: "NS", W: 3, L: 4.5, dVth: 0 },
-  T3: { type: "N", G: "GC", S: "NG", D: "ND", W: 3, L: 4.5, dVth: 0 },
-  T4: { type: "N", G: "GI", S: "VINT", D: "NG", W: 3, L: 4.5, dVth: 0 },
-  T5: { type: "P", G: "EM", S: "ELVDD", D: "NS", W: 6, L: 4.5, dVth: 0 },
-  T6: { type: "P", G: "EM", S: "ND", D: "ANODE", W: 6, L: 4.5, dVth: 0 },
-  T7: { type: "P", G: "GW", S: "VINT", D: "ANODE", W: 3, L: 4.5, dVth: 0 },
-  T8: { type: "P", G: "GO", S: "VOBS", D: "NS", W: 3, L: 4.5, dVth: 0 },
+  T1: { type: "P", G: "NG", S: "NS", D: "ND", W: 3, L: 6, ..._pfresh },
+  T2: { type: "P", G: "GW", S: "DATA", D: "NS", W: 3, L: 4.5, ..._pfresh },
+  T3: { type: "N", G: "GC", S: "NG", D: "ND", W: 3, L: 4.5, ..._pfresh },
+  T4: { type: "N", G: "GI", S: "VINT", D: "NG", W: 3, L: 4.5, ..._pfresh },
+  T5: { type: "P", G: "EM", S: "ELVDD", D: "NS", W: 6, L: 4.5, ..._pfresh },
+  T6: { type: "P", G: "EM", S: "ND", D: "ANODE", W: 6, L: 4.5, ..._pfresh },
+  T7: { type: "P", G: "GW", S: "VINT", D: "ANODE", W: 3, L: 4.5, ..._pfresh },
+  T8: { type: "P", G: "GO", S: "VOBS", D: "NS", W: 3, L: 4.5, ..._pfresh },
 };
+
+// ---- aging (stress estimator + margin map) ----
+export interface StressRow {
+  tft: string; duty_on: number; von_V: number; voff_V: number; vsd_V: number;
+  dVth: number; ion: number; ioff: number; ss: number;
+}
+export interface StressResult {
+  ok: boolean; kind?: string; job?: string; window_us?: number[];
+  temp_C?: number; hours?: number; coefs?: Record<string, number>;
+  law?: string; weight_note?: string; table?: StressRow[]; errors?: string[];
+}
+export interface MarginCell {
+  ok: boolean; job?: string; err?: string;
+  pass?: boolean; nfail?: number; i_uA?: number; pct?: number;
+}
+export interface MarginStatus {
+  margin_job: string; state: string; done: number; total: number;
+  kind: string; vgh: number[]; vgl: number[];
+  nominal: { VGH: number; VGL: number };
+  grids: { degraded: MarginCell[][]; fresh: MarginCell[][] };
+  ref_i_uA?: number; error?: string;
+}
+export const STRESS_COEFS: Record<string, number> =
+  { A_P: 0.005, A_N: 0.003, N_T: 0.35, Ea_eV: 0.35, V0: 5.0, V0off: 10.0,
+    G_ON: 1.5, G_OFF: 1.0, A_MU: 0.1, A_OFF: 0.5, A_SS: 0.05 };
 // Pixel schematic positions (viewBox 720x470).
 export const PIXEL_POS: Record<PTft, [number, number]> =
   {T1:[300,180],T2:[140,120],T3:[430,120],T4:[560,120],T5:[140,260],T6:[430,300],T7:[560,300],T8:[300,340]};

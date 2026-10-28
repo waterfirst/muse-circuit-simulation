@@ -1,0 +1,24 @@
+{
+ "kind": "driver",
+ "preset": "EM",
+ "VGH": 8.0,
+ "VGL": -9.5,
+ "freq_kHz": 250,
+ "stages": 2,
+ "frames": 1,
+ "temp_C": 85,
+ "tft": {
+  "T3": {
+   "G": "VGL",
+   "S": "N1",
+   "D": "N3",
+   "W": 4,
+   "L": 4.5,
+   "type": "P",
+   "dVth": 0.5,
+   "ion": 0.8,
+   "ioff": 2.0,
+   "ss": 1.1
+  }
+ }
+}

@@ -1,16 +1,592 @@
-EM: pass=True job=20261028_232114_e7bf95 reasons=['all stages: exactly one ordered pulse, levels OK']
-GC: pass=True job=20261028_232118_62946d reasons=['all stages: exactly one ordered pulse, levels OK']
-GI: pass=True job=20261028_232122_59084c reasons=['all stages: exactly one ordered pulse, levels OK']
-GW: pass=True job=20261028_232126_a181ce reasons=['all stages: exactly one ordered pulse, levels OK']
-=== npm test ===
-[2m      Tests [22m [1m[32m34 passed[39m[22m[90m (34)[39m
-[2m   Start at [22m 23:21:29
-[2m   Duration [22m 1.60s[2m (tests 59%, environment 26%, import 10%, transform 4%, worker 1%)[22m
+=== SELF-CHECK 2026-10-29 00:19 KST (scripts/self_check.sh) ===
+backend: 21/21 pass (19.2s, OMP_THREAD_LIMIT=1); npm test: 34/34 pass; npm run build: ok; base /circuit-muse/ in dist/index.html
 
-=== npm run build ===
-✓ built in 145ms
 === key numbers (each from a saved ngspice run in server/runs/) ===
-EM start->output width: 2H->1.01H (20261028_231917_7f2d59), 4H->3.01H (20261028_231921_cf5f8a), 8H->7.01H (20261028_231926_dd87d1); all stages exactly one ordered pulse, high>=VGH-1.5V, rest<=-7.5V
-pixel DATA 2/3/4V emission current: 4.1267/1.6998/0.2861 uA, NG after GC 0.79/1.79/2.79V (20261028_231932_91d454, 20261028_231933_8d1174, 20261028_231934_e5fb58)
-pixel T1 dVth -0.2/0/+0.2V: 1.7025/1.6998/1.6964 uA, spread 0.36% (20261028_231931_e42f61, 20261028_231931_bf8b9c, 20261028_231932_7ae43f)
-backend: 11/11 pass; npm test: 34/34 pass; npm run build: ok; base /circuit-muse/ verified in dist/index.html
+EM start->output width: 2H->1.01H (20261029_001935_1cf2bc), 4H->3.01H (20261029_001936_ae6381), 8H->7.01H (20261029_001937_8d8126); all stages exactly one ordered pulse, high>=VGH-1.5V, rest<=-7.5V
+pixel DATA 2/3/4V emission current: 4.1267/1.6998/0.2861 uA, NG after GC 0.79/1.79/2.79V (20261029_001945_b2304f, 20261029_001945_6e1f58, 20261029_001946_eaf54d)
+pixel T1 dVth -0.2/0/+0.2V: 1.7025/1.6998/1.6964 uA, spread 0.36% (20261029_001944_5fd349, 20261029_001944_0b5dd6, 20261029_001945_818ded)
+degraded EM T3/T9(dVth=1.5,ion=0.15): FAIL at nominal (20261029_001930_1cbf4f, OUT1 high -0.68V), PASS at VGL=-11 (20261029_001931_0966e5)
+max-uniform degradation: FAIL at nominal (20261029_001933_8daac6) and corner (12,-14) (20261029_001933_9927a5) — not fixable by rails
+stress: driver EM 12-row table (fresh job 20261029_001934_61e2d2), pixel 8-row table (fresh job 20261029_001935_7746a7), GW via HTTP (20261029_001943_11bd88)
+margin map: 8 cells done (margin_20261029_001939_c0815a)
+model: compiled md5 == gw_lab md5 (93343937944ab439a0dec0306c9f5ea9); same deck both OSDI -> identical pass/extremes/widths (20261029_001943_23e536 vs 20261029_001944_505282)
+
+=== full log ===
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001930_1cbf4f/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001930_1cbf4f/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001930_1cbf4f/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001930_1cbf4f/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001930_1cbf4f/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001931_0966e5/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001931_0966e5/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001931_0966e5/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001931_0966e5/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001931_0966e5/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_8daac6/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_8daac6/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_8daac6/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_8daac6/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_8daac6/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_9927a5/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_9927a5/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_9927a5/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_9927a5/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001933_9927a5/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001934_61e2d2/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001934_61e2d2/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001934_61e2d2/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001934_61e2d2/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001934_61e2d2/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/aging.py:52: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001934_61e2d2/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(os.path.join(jobdir, "out.txt")).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:716: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_7746a7/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_7746a7/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_7746a7/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_7746a7/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:754: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_7746a7/job.cir' mode='r' encoding='UTF-8'>
+  "series": series, "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/aging.py:52: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_7746a7/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(os.path.join(jobdir, "out.txt")).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_1cf2bc/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_1cf2bc/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_1cf2bc/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_1cf2bc/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001935_1cf2bc/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001936_ae6381/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001936_ae6381/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001936_ae6381/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001936_ae6381/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001936_ae6381/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001937_8d8126/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001937_8d8126/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001937_8d8126/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001937_8d8126/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001937_8d8126/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_8acc9f/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_8acc9f/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_8acc9f/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_8acc9f/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_8acc9f/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_40a406/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_40a406/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_40a406/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_40a406/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_40a406/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_775d65/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_775d65/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_775d65/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_775d65/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001939_775d65/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_d35b53/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_d35b53/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_d35b53/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_d35b53/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_d35b53/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_327cd7/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_327cd7/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_327cd7/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_327cd7/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_327cd7/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_1c5b4d/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_1c5b4d/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_1c5b4d/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_1c5b4d/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001940_1c5b4d/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_b60b4f/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_b60b4f/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_b60b4f/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_b60b4f/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_b60b4f/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_70de30/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_70de30/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_70de30/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_70de30/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001941_70de30/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/aging.py:321: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/margin_20261029_001939_c0815a/summary.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(mdir, "summary.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_f11cac/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_f11cac/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_f11cac/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_f11cac/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_f11cac/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_11bd88/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_11bd88/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_11bd88/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_11bd88/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_11bd88/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/aging.py:52: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_11bd88/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(os.path.join(jobdir, "out.txt")).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/tests/test_model.py:25: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/models/.gwlab_md5' mode='r' encoding='UTF-8'>
+  ref = open(md5file).read().strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/tests/test_model.py:18: ResourceWarning: unclosed file <_io.BufferedReader name='/home/waterfirst/meta_muse/gw-react/server/ptft_fit.osdi'>
+  return hashlib.md5(open(path, "rb").read()).hexdigest()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_23e536/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_23e536/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_23e536/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_23e536/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001943_23e536/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_505282/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_505282/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_505282/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_505282/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_505282/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:716: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_5fd349/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_5fd349/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_5fd349/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_5fd349/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:754: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_5fd349/job.cir' mode='r' encoding='UTF-8'>
+  "series": series, "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:716: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_0b5dd6/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_0b5dd6/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_0b5dd6/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_0b5dd6/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:754: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001944_0b5dd6/job.cir' mode='r' encoding='UTF-8'>
+  "series": series, "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:716: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_818ded/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_818ded/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_818ded/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_818ded/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:754: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_818ded/job.cir' mode='r' encoding='UTF-8'>
+  "series": series, "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:716: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_b2304f/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_b2304f/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_b2304f/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_b2304f/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:754: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_b2304f/job.cir' mode='r' encoding='UTF-8'>
+  "series": series, "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:716: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_6e1f58/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_6e1f58/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_6e1f58/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_6e1f58/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:754: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001945_6e1f58/job.cir' mode='r' encoding='UTF-8'>
+  "series": series, "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:716: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_eaf54d/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_eaf54d/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_eaf54d/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_eaf54d/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:754: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_eaf54d/job.cir' mode='r' encoding='UTF-8'>
+  "series": series, "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_15127b/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_15127b/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_15127b/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_15127b/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001946_15127b/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001947_435635/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001947_435635/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001947_435635/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001947_435635/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001947_435635/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001948_eb6ddc/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001948_eb6ddc/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001948_eb6ddc/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001948_eb6ddc/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001948_eb6ddc/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/waterfirst/meta_muse/gw-react/server/backend.py:537: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001949_77826c/desc.json' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "desc.json"), "w").write(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001949_77826c/job.cir' mode='w' encoding='UTF-8'>
+  open(cir, "w").write("\n".join(L) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:518: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001949_77826c/ngspice.log' mode='w' encoding='UTF-8'>
+  open(os.path.join(jobdir, "ngspice.log"), "w").write(proc.stdout + proc.stderr)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:523: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001949_77826c/out.txt' mode='r' encoding='UTF-8'>
+  lines = open(txt).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/waterfirst/meta_muse/gw-react/server/backend.py:570: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/waterfirst/meta_muse/gw-react/server/runs/20261029_001949_77826c/job.cir' mode='r' encoding='UTF-8'>
+  "cir": open(cir).read()}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+......
+----------------------------------------------------------------------
+Ran 21 tests in 19.216s
+
+OK
+nominal FAIL job= 20261029_001930_1cbf4f ['frame1 OUT1: high -0.68V < VGH-margin 6.50V']
+VGL=-11 PASS job= 20261029_001931_0966e5
+max-uniform (8.0, -9.5) FAIL job= 20261029_001933_8daac6 ['frame1 OUT1: 0 active pulses in window (expected exactly 1)']
+max-uniform (12.0, -14.0) FAIL job= 20261029_001933_9927a5 ['frame1 OUT1: 0 active pulses in window (expected exactly 1)']
+driver stress T12: {'tft': 'T12', 'duty_on': 0.8199, 'von_V': 16.251, 'voff_V': -0.204, 'vsd_V': 2.156, 'dVth': 2.0735, 'ion': 0.8283, 'ioff': 2.0368, 'ss': 1.1037} job= 20261029_001934_61e2d2
+pixel stress T5: {'tft': 'T5', 'duty_on': 0.9781, 'von_V': 14.1, 'voff_V': -3.399, 'vsd_V': 0.063, 'dVth': 2.0007, 'ion': 0.8333, 'ioff': 2.0004, 'ss': 1.1} job= 20261029_001935_7746a7
+start 2H -> measured [1.01, 1.01, 1.01, 1.01] job=20261029_001935_1cf2bc pass=True
+start 4H -> measured [3.01, 3.01, 3.01, 3.01] job=20261029_001936_ae6381 pass=True
+start 8H -> measured [7.01, 7.01, 7.01, 7.01] job=20261029_001937_8d8126 pass=True
+127.0.0.1 - "POST /api/margin HTTP/1.1" 202 -
+127.0.0.1 - "GET /api/margin?id=margin_20261029_001939_c0815a HTTP/1.1" 200 -
+127.0.0.1 - "GET /api/margin?id=margin_20261029_001939_c0815a HTTP/1.1" 200 -
+127.0.0.1 - "GET /api/margin?id=margin_20261029_001939_c0815a HTTP/1.1" 200 -
+margin: margin_20261029_001939_c0815a 8 cells ok
+127.0.0.1 - "POST /api/sim HTTP/1.1" 200 -
+sim degraded+hot: 200 job= 20261029_001943_f11cac
+127.0.0.1 - "POST /api/stress HTTP/1.1" 200 -
+stress GW rows: 9 job= 20261029_001943_11bd88 T6: {'tft': 'T6', 'duty_on': 0.9525, 'von_V': 16.16, 'voff_V': -0.119, 'vsd_V': 0.616, 'dVth': 1.3589, 'ion': 0.8804, 'ioff': 1.6795, 'ss': 1.0679}
+compiled: 93343937944ab439a0dec0306c9f5ea9 gw_lab: 93343937944ab439a0dec0306c9f5ea9
+compiled job: 20261029_001943_23e536 gwlab job: 20261029_001944_505282
+dVth=-0.2: I=1.7025uA job=20261029_001944_5fd349
+dVth=+0.0: I=1.6998uA job=20261029_001944_0b5dd6
+dVth=+0.2: I=1.6964uA job=20261029_001945_818ded
+compensation spread: 0.36%
+DATA=2.0V: I=4.1267uA NG=0.7859V job=20261029_001945_b2304f
+DATA=3.0V: I=1.6998uA NG=1.7891V job=20261029_001945_6e1f58
+DATA=4.0V: I=0.2861uA NG=2.7923V job=20261029_001946_eaf54d
+EM: pass=True job=20261029_001946_15127b reasons=['all stages: exactly one ordered pulse, levels OK']
+GC: pass=True job=20261029_001947_435635 reasons=['all stages: exactly one ordered pulse, levels OK']
+GI: pass=True job=20261029_001948_eb6ddc reasons=['all stages: exactly one ordered pulse, levels OK']
+GW: pass=True job=20261029_001949_77826c reasons=['all stages: exactly one ordered pulse, levels OK']
+<sys>:0: ResourceWarning: unclosed <socket.socket fd=4, family=2, type=1, proto=0, laddr=('127.0.0.1', 8769)>
+
+> gw-react@0.0.0 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90m/home/waterfirst/meta_muse/gw-react[39m
+
+ [32m✓[39m src/lib/api.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/circuit.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/data.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+[90mstderr[2m | src/App.test.tsx[2m > [22m[2mreport page[2m > [22m[2mrenders on #/gw7t with tables and canvas
+[22m[39mInvalid DOM property `font-weight`. Did you mean `fontWeight`?
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ [32m✓[39m src/App.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 1347[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m34 passed[39m[22m[90m (34)[39m
+[2m   Start at [22m 00:19:50
+[2m   Duration [22m 2.36s[2m (tests 57%, environment 28%, import 9%, transform 5%, worker 1%)[22m
+
+
+> gw-react@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 32 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.52 kB │ gzip:   0.34 kB
+dist/assets/index-BGtxQZEt.css    3.47 kB │ gzip:   1.14 kB
+dist/assets/index-B09vTtSc.js   802.98 kB │ gzip: 183.27 kB
+
+✓ built in 145ms
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+SELF-CHECK OK

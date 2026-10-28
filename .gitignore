@@ -12,9 +12,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# NOTE: dist/ is intentionally NOT ignored: committed prebuilt so npm is optional.
 dist-ssr
 *.local
+
+# Company netlists/cards/measured data: untracked, never committed.
+private/
 
 # Editor directories and files
 .vscode/*

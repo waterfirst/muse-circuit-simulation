@@ -6,6 +6,7 @@ import { BROKEN, DEFAULT_PARAMS, NETS, PRESETS, PRESET_POLARITY, PRESET_WIDTH_H,
 import { tryBackend } from "../lib/api";
 import ParamForm from "../components/ParamForm";
 import TftTable from "../components/TftTable";
+import { MarginPanel, StressPanel } from "../components/Aging";
 import CapsEditor from "../components/CapsEditor";
 import SchemEditor, { NetPicker } from "../components/SchemEditor";
 import WavePlot from "../components/WavePlot";
@@ -125,8 +126,10 @@ export default function LabPage() {
           onChange={(t, pin, net) => setPin(t, pin, net)}
           onToggle={(t, on) => toggleTft(t, on)}
           onSize={(t, k, v) => setTft((p) => ({ ...p, [t]: { ...p[t], [k]: v } }))}
-          onType={(t, ty) => setTft((p) => ({ ...p, [t]: { ...p[t], type: ty } }))} />
-        <p className="note">허용 넷: VGH VGL FLM CLK1 CLK2 A B C Q QB OUT IN N1~N8. T1~T12.</p>
+          onType={(t, ty) => setTft((p) => ({ ...p, [t]: { ...p[t], type: ty } }))}
+          onDeg={(t, k, v) => setTft((p) => ({ ...p, [t]: { ...p[t], [k]: v } }))} />
+        <p className="note">허용 넷: VGH VGL FLM CLK1 CLK2 A B C Q QB OUT IN N1~N8. T1~T12.
+          ΔVth/Ion/Ioff/SS는 fresh(0/1/1/1)와 다르면 노란색. 온도는 1번 패널.</p>
       </div>
       <CapsEditor caps={caps}
         onChange={(i, c) => setCaps((p) => p.map((x, j) => (j === i ? c : x)))}
@@ -159,6 +162,21 @@ export default function LabPage() {
             휴지 ≤ rest spec, 출력폭 = 스타트폭 ±1.5H.</p>
         </div>
       )}
+      <StressPanel
+        getDesc={() => buildDesc(params, tft, preset, caps) as unknown as Record<string, unknown>}
+        onApply={(rows) => setTft((p) => {
+          const n = { ...p };
+          for (const r of rows) {
+            const t = r.tft as TName;
+            if (n[t]) n[t] = { ...n[t],
+              dVth: Math.max(-2, Math.min(2, r.dVth)),
+              ion: r.ion, ioff: r.ioff, ss: r.ss };
+          }
+          return n;
+        })} />
+      <MarginPanel
+        getDesc={() => buildDesc(params, tft, preset, caps) as unknown as Record<string, unknown>}
+        kind="driver" />
       <WavePlot series={series} info={info} enabled={enabled} lanes={lanes}
         onToggleLane={(lab) => setEnabled((p) => ({ ...p, [lab]: !p[lab] }))}
         marginReqLow={margin} />

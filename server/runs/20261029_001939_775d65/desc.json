@@ -1,0 +1,9 @@
+{
+ "kind": "driver",
+ "preset": "EM",
+ "VGH": 9.0,
+ "VGL": -10.5,
+ "freq_kHz": 250,
+ "stages": 2,
+ "frames": 1
+}
