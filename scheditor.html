@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>회로도 에디터 - TFT 연결표 to 회로도 + .cir</title>
+<style>
+body { font-family: sans-serif; margin: 12px; background: #f4f4f4; color: #222; }
+h1 { font-size: 20px; margin: 4px 0 10px; }
+.card { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+table { border-collapse: collapse; font-size: 13px; }
+th, td { border: 1px solid #bbb; padding: 3px 6px; text-align: center; }
+th { background: #e8eef6; }
+input, select { font-size: 13px; padding: 2px 4px; }
+input.num { width: 52px; }
+input.net { width: 64px; }
+button { font-size: 13px; padding: 5px 12px; margin: 2px; cursor: pointer; }
+button.primary { background: #1565c0; color: #fff; border: none; border-radius: 4px; }
+pre { background: #111; color: #cfc; font-size: 11.5px; padding: 10px; overflow: auto; max-height: 420px; white-space: pre-wrap; }
+#schem { overflow: auto; background: #fff; border: 1px solid #ccc; }
+.note { font-size: 12px; color: #555; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; align-items: end; }
+label { font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>회로도 에디터 - 표 입력 to 회로도 + .cir 다운로드</h1>
+
+<div class="card">
+<h3>0. 예시 불러오기 / 새로 만들기</h3>
+<div class="row">
+<label>예시
+<select id="preset">
+<option value="GW">GW 9T (driver)</option>
+<option value="GW10T2C">GW 10T2C T10 NMOS (driver)</option>
+<option value="EM">EM 12T3C (driver)</option>
+<option value="EM12T2C">EM 12T2C (driver)</option>
+<option value="GC">GC 12T3C (driver)</option>
+<option value="GI">GI 12T3C (driver)</option>
+<option value="GM">GM 9T (driver, GW형)</option>
+<option value="GO">GO 10T2C (driver, GW10T형)</option>
+<option value="PIXEL6T2C">PIXEL 6T2C (pixel)</option>
+<option value="PIXEL7T1C">PIXEL 7T1C (pixel)</option>
+<option value="PIXEL">PIXEL 8T1C (pixel)</option>
+<option value="PIXEL9T2C">PIXEL 9T2C (pixel)</option>
+</select></label>
+<button id="loadBtn">불러오기</button>
+<button id="newDrv">새 driver (빈 4T)</button>
+<button id="newPx">새 pixel (빈 8T)</button>
+<span class="note" id="modeTag"></span>
+</div>
+<p class="note">GIP 계열(GW/EM/GC/GI)과 PIXEL 데이터를 예시로 내장. 표를 고치면 회로도와 넷리스트가 자동 갱신된다. 새 회로 버튼으로 빈 표에서 시작 가능.</p>
+</div>
+
+<div class="card">
+<h3>1. 시뮬 파라미터 (.cir 상단 소스용)</h3>
+<div class="row" id="paramRow"></div>
+</div>
+
+<div class="card">
+<h3>2. TFT 연결표</h3>
+<table id="tftTable">
+<thead><tr><th>TR</th><th>사용</th><th>G(Gate)</th><th>S(Source)</th><th>D(Drain)</th><th>W(um)</th><th>L(um)</th><th>P/N</th><th>삭제</th></tr></thead>
+<tbody id="tftBody"></tbody>
+</table>
+<button id="addTft">TR 추가</button>
+<datalist id="netList"></datalist>
+</div>
+
+<div class="card" id="capCard">
+<h3>3. 캐패시터표</h3>
+<table><thead><tr><th>이름</th><th>사용</th><th>a단</th><th>b단</th><th>값(pF)</th><th>삭제</th></tr></thead>
+<tbody id="capBody"></tbody></table>
+<button id="addCap">C 추가</button>
+</div>
+
+<div class="card">
+<h3>4. 회로도 (자동, 전기 기호)</h3>
+<table><thead><tr><th>D</th><th>사용</th><th>anode</th><th>cathode</th><th>모델</th><th>삭제</th></tr></thead>
+<tbody id="diodeBody"></tbody></table>
+<button id="addDiode">D 추가</button>
+<span class="note">다이오드는 아래 연결도에 기호로 그려지고 .cir에도 D소자로 나간다.</span>
+<div id="schem"></div>
+<p class="note">교과서식: 검은 배선으로 같은 넷끼리 직접 연결. VGH는 위 공통선, VGL은 아래 공통선.
+만나는 점(검은 점)=접속, 점 없이 교차=비접속. P타입 게이트 동그라미, N타입 소스 화살.
+CAP은 두 장 판, DIODE는 삼각(anode) + 바(cathode).</p>
+</div>
+
+<div class="card">
+<h3>5. 넷리스트</h3>
+<button class="primary" id="dlCir">.cir 다운로드</button>
+<button id="dlJson">표 JSON 저장</button>
+<button id="loadJsonBtn">표 JSON 불러오기</button>
+<input type="file" id="loadJson" accept=".json" style="display:none">
+<pre id="cirPrev"></pre>
+</div>
+
+<script>
+"use strict";
+// ---------- 내장 예시 데이터 (gw-react 회로 데이터) ----------
+var DRV_NETS = ["VGH","VGL","FLM","CLK1","CLK2","A","B","C","Q","Q2","QB","OUT","IN",
+"N1","N2","N3","N4","N5","N6","N7","N8"];
+var PX_NETS = ["VGH","VGL","GI","GC","GW","EM","GO","DATA","VINT","VOBS","ELVDD","ELVSS",
+"NG","NS","ND","ANODE"];
+function T(G,S,D,W,L,type){ return {G:G,S:S,D:D,W:W,L:L,type:type||"P",on:true}; }
+var PRESETS = {
+GW: { mode:"driver", polarity:"low_pulse", startW:1,
+  tfts:{T1:T("CLK1","FLM","B",8,4.5),T2:T("C","VGH","A",4,6),T3:T("CLK2","A","B",4,4.5),
+  T4:T("B","VGH","C",4,4.5),T5:T("CLK1","QB","VGL",4,6),T6:T("QB","VGH","OUT",40,4.5),
+  T7:T("Q","OUT","CLK2",4,4.5),T8:T("VGL","Q2","Q",4,4.5),T9:T("CLK2","QB","C",4,4.5)},
+  caps:[{name:"C1",a:"VGH",b:"QB",pf:1.0,on:true},{name:"C2",a:"OUT",b:"Q",pf:0.2,on:true}] },
+GW10T2C: { mode:"driver", polarity:"low_pulse", startW:1,
+  tfts:{T1:T("CLK1","FLM","Q2",6,4),T2:T("QB","VGH","A",6,4),T3:T("CLK2","A","Q2",6,4),
+  T4:T("Q2","CLK1","QB",60,4),T5:T("CLK1","QB","Q",12,4),T6:T("QB","VGH","B",6,4),
+  T7:T("Q","CLK2","B",100,4),T8:T("VGL","Q2","Q",12,4),T9:T("B","VGH","OUT",200,4),
+  T10:T("B","OUT","VGL",200,4,"N")},
+  caps:[{name:"C1",a:"VGH",b:"QB",pf:1.0,on:true},{name:"C2",a:"Q",b:"B",pf:2.0,on:true}] },
+EM: { mode:"driver", polarity:"high_pulse", startW:4,
+  tfts:{T1:T("N2","VGH","N7",8,4.5),T2:T("CLK2","N7","N3",8,4.5),T3:T("VGL","N1","N3",4,4.5),
+  T4:T("N4","VGH","OUT",40,4.5),T5:T("N3","OUT","VGL",20,4.5),T6:T("CLK1","FLM","N1",8,4.5),
+  T7:T("N1","N2","CLK1",4,4.5),T8:T("CLK1","N2","VGL",4,4.5),T9:T("VGL","N2","N5",4,4.5),
+  T10:T("CLK2","N6","N4",4,4.5),T11:T("N5","N6","CLK2",4,4.5),T12:T("N1","VGH","N4",8,4.5)},
+  caps:[{name:"C1",a:"N3",b:"CLK2",pf:0.3,on:true},{name:"C2",a:"N5",b:"N6",pf:0.3,on:true},
+  {name:"C3",a:"VGH",b:"N4",pf:1.0,on:true}] },
+EM12T2C: { mode:"driver", polarity:"high_pulse", startW:8,
+  tfts:{T1:T("CLK1","FLM","Q",8,6),T2:T("QB","VGH","A",8,6),T3:T("VGL","CLK2","A",4,4.5),
+  T4:T("Q","CLK1","QB",4,16),T5:T("CLK1","QB","VGL",4,4.5),T6:T("CLK2","QB","C",4,4.5),
+  T7:T("N1","CLK2","C",4,4.5),T8:T("Q","VGH","QB",4,4.5),T9:T("QB","VGH","OUT",92,4.5),
+  T10:T("N2","VGL","OUT",92,4.5),T11:T("VGL","QB","N1",4,4.5),T12:T("VGL","Q","N2",4,4.5)},
+  caps:[{name:"C1",a:"VGH",b:"QB",pf:0.1,on:true},{name:"C2",a:"A",b:"VGL",pf:0.18,on:true}] },
+PIXEL6T2C: { mode:"pixel",
+  tfts:{T1:T("NG","NS","ND",3,6),T2:T("GW","DATA","NS",3,4.5),T3:T("GW","NG","ND",3,4.5),
+  T4:T("GI","VINT","NG",3,4.5),T5:T("EM","ELVDD","NS",6,4.5),T6:T("EM","ND","ANODE",6,4.5)},
+  caps:[{name:"C2",a:"GW",b:"NG",pf:0.05,on:true}],
+  diodes:[{name:"Doled", a:"ANODE", k:"N_OLED", model:"oled", on:true}] },
+PIXEL7T1C: { mode:"pixel",
+  tfts:{T1:T("NG","NS","ND",3,6),T2:T("GW","DATA","NS",3,4.5),T3:T("GW","NG","ND",3,4.5,"N"),
+  T4:T("GI","VINT","NG",3,4.5,"N"),T5:T("EM","ELVDD","NS",6,4.5),T6:T("EM","ND","ANODE",6,4.5),
+  T7:T("GI","VINT","ANODE",3,4.5)},
+  caps:[],
+  diodes:[{name:"Doled", a:"ANODE", k:"N_OLED", model:"oled", on:true}] },
+PIXEL: { mode:"pixel",
+  tfts:{T1:T("NG","NS","ND",3,6),T2:T("GW","DATA","NS",3,4.5),T3:T("GC","NG","ND",3,4.5,"N"),
+  T4:T("GI","VINT","NG",3,4.5,"N"),T5:T("EM","ELVDD","NS",6,4.5),T6:T("EM","ND","ANODE",6,4.5),
+  T7:T("GW","VINT","ANODE",3,4.5),T8:T("GO","VOBS","NS",3,4.5)},
+  caps:[],
+  diodes:[{name:"Doled", a:"ANODE", k:"N_OLED", model:"oled", on:true}] },
+PIXEL9T2C: { mode:"pixel",
+  tfts:{T1:T("NG","NS","ND",3,6),T2:T("GW","DATA","NS",3,4.5),T3:T("GC","NG","ND",3,4.5,"N"),
+  T4:T("GI","VINT","NG",3,4.5,"N"),T5:T("EM","ELVDD","NS",6,4.5),T6:T("EM","ND","ANODE",6,4.5),
+  T7:T("GW","VINT","ANODE",3,4.5),T8:T("GO","VOBS","NS",3,4.5),
+  T9:T("GI","NG","NS",3,4.5,"N")},
+  caps:[{name:"C2",a:"EM",b:"NS",pf:0.1,on:true}],
+  diodes:[{name:"Doled", a:"ANODE", k:"N_OLED", model:"oled", on:true}] }
+};
+PRESETS.GC = JSON.parse(JSON.stringify(PRESETS.EM));
+PRESETS.GI = JSON.parse(JSON.stringify(PRESETS.EM));
+PRESETS.GM = JSON.parse(JSON.stringify(PRESETS.GW)); PRESETS.GM.startW = 2;
+PRESETS.GO = JSON.parse(JSON.stringify(PRESETS.GW10T2C)); PRESETS.GO.startW = 2;
+// ---------- 상태 ----------
+var S = { mode:"driver", order:[], tfts:{}, caps:[], diodes:[], P:{} };
+function defParams(mode){
+  return mode === "driver"
+    ? {VGH:8, VGL:-9.5, freq:250, stages:6, frames:2, startW:1, polarity:"low_pulse", cload:1.0}
+    : {VGH:8, VGL:-9.5, ELVDD:4.6, ELVSS:0, VINT:-2, VOBS:5, DATA:3, frameHz:120,
+       Cst:0.2, Coled:1.0, VT0P:1.1, VT0N:1.1};
+}
+function loadPreset(name){
+  var p = PRESETS[name];
+  S.mode = p.mode;
+  S.order = Object.keys(p.tfts);
+  S.tfts = JSON.parse(JSON.stringify(p.tfts));
+  S.caps = JSON.parse(JSON.stringify(p.caps || []));
+  S.diodes = JSON.parse(JSON.stringify(p.diodes || []));
+  S.P = defParams(p.mode);
+  if (p.mode === "driver"){ S.P.startW = p.startW; S.P.polarity = p.polarity; }
+  refreshAll();
+}
+// ---------- 표 렌더 ----------
+function netOptions(){ return S.mode === "driver" ? DRV_NETS : PX_NETS; }
+function refreshAll(){ renderParams(); renderTfts(); renderCaps(); renderDiodes(); draw(); makeCir(); }
+function renderParams(){
+  var el = document.getElementById("paramRow"); el.innerHTML = "";
+  var defs = S.mode === "driver"
+    ? [["VGH","V"],"VGL","freq(kHz)","stages","frames","startW(H)","cload(pF)"]
+    : [["VGH","V"],"VGL","ELVDD","ELVSS","VINT","VOBS","DATA(V)","frameHz","Cst(pF)","Coled(pF)"];
+  // driver: [key,label] 혼합 처리
+  var keys = S.mode === "driver"
+    ? [["VGH","VGH(V)"],["VGL","VGL(V)"],["freq","freq(kHz)"],["stages","stages"],["frames","frames"],
+       ["startW","startW(H)"],["cload","cload(pF)"]]
+    : [["VGH","VGH(V)"],["VGL","VGL(V)"],["ELVDD","ELVDD(V)"],["ELVSS","ELVSS(V)"],["VINT","VINT(V)"],
+       ["VOBS","VOBS(V)"],["DATA","DATA(V)"],["frameHz","frame(Hz)"],["Cst","Cst(pF)"],["Coled","Coled(pF)"]];
+  keys.forEach(function(k){
+    var lab = document.createElement("label"); lab.textContent = k[1] + " ";
+    var inp = document.createElement("input"); inp.className = "num"; inp.style.width = "64px";
+    inp.value = S.P[k[0]];
+    inp.onchange = function(){ S.P[k[0]] = parseFloat(inp.value); draw(); makeCir(); };
+    lab.appendChild(inp); el.appendChild(lab);
+  });
+  if (S.mode === "driver"){
+    var lab = document.createElement("label"); lab.textContent = "극성 ";
+    var sel = document.createElement("select");
+    ["low_pulse","high_pulse"].forEach(function(o){
+      var op = document.createElement("option"); op.value = o; op.textContent = o;
+      if (S.P.polarity === o) op.selected = true; sel.appendChild(op); });
+    sel.onchange = function(){ S.P.polarity = sel.value; draw(); makeCir(); };
+    lab.appendChild(sel); el.appendChild(lab);
+  }
+  document.getElementById("modeTag").textContent = "모드: " + S.mode;
+  document.getElementById("capCard").style.display = S.mode === "driver" ? "" : "none";
+}
+function netInput(val, cb){
+  var inp = document.createElement("input"); inp.className = "net";
+  inp.setAttribute("list", "netList"); inp.value = val || "";
+  inp.onchange = function(){ cb(inp.value.trim()); draw(); makeCir(); };
+  return inp;
+}
+function renderTfts(){
+  var dl = document.getElementById("netList"); dl.innerHTML = "";
+  netOptions().forEach(function(n){ var o = document.createElement("option"); o.value = n; dl.appendChild(o); });
+  var tb = document.getElementById("tftBody"); tb.innerHTML = "";
+  S.order.forEach(function(name){
+    var t = S.tfts[name];
+    var tr = document.createElement("tr");
+    function td(el){ var c = document.createElement("td"); c.appendChild(el); tr.appendChild(c); return c; }
+    var b = document.createElement("b"); b.textContent = name;
+    td(b);
+    var on = document.createElement("input"); on.type = "checkbox"; on.checked = t.on;
+    on.onchange = function(){ t.on = on.checked; draw(); makeCir(); }; td(on);
+    td(netInput(t.G, function(v){ t.G = v; }));
+    td(netInput(t.S, function(v){ t.S = v; }));
+    td(netInput(t.D, function(v){ t.D = v; }));
+    [["W",2,2000],["L",0.5,100]].forEach(function(cfg){
+      var inp = document.createElement("input"); inp.className = "num"; inp.value = t[cfg[0]];
+      inp.onchange = function(){ var v = parseFloat(inp.value); if (v >= cfg[1] && v <= cfg[2]) t[cfg[0]] = v; draw(); makeCir(); };
+      td(inp); });
+    var sel = document.createElement("select");
+    [["P","PMOS"],["N","NMOS"]].forEach(function(o){
+      var op = document.createElement("option"); op.value = o[0]; op.textContent = o[1];
+      if (t.type === o[0]) op.selected = true; sel.appendChild(op); });
+    sel.onchange = function(){ t.type = sel.value; draw(); makeCir(); }; td(sel);
+    var del = document.createElement("button"); del.textContent = "X";
+    del.onclick = function(){ delete S.tfts[name]; S.order = S.order.filter(function(x){ return x !== name; }); refreshAll(); };
+    td(del);
+    tb.appendChild(tr);
+  });
+}
+function renderCaps(){
+  var tb = document.getElementById("capBody"); tb.innerHTML = "";
+  S.caps.forEach(function(c, i){
+    var tr = document.createElement("tr");
+    function td(el){ var cc = document.createElement("td"); cc.appendChild(el); tr.appendChild(cc); return c; }
+    function td2(el){ var cc = document.createElement("td"); cc.appendChild(el); tr.appendChild(cc); }
+    var nm = document.createElement("input"); nm.className = "net"; nm.value = c.name;
+    nm.onchange = function(){ c.name = nm.value.trim() || c.name; makeCir(); };
+    td2(nm);
+    var on = document.createElement("input"); on.type = "checkbox"; on.checked = c.on;
+    on.onchange = function(){ c.on = on.checked; draw(); makeCir(); }; td2(on);
+    td2(netInput(c.a, function(v){ c.a = v; }));
+    td2(netInput(c.b, function(v){ c.b = v; }));
+    var pf = document.createElement("input"); pf.className = "num"; pf.value = c.pf;
+    pf.onchange = function(){ var v = parseFloat(pf.value); if (v >= 0 && v <= 100) c.pf = v; makeCir(); };
+    td2(pf);
+    var del = document.createElement("button"); del.textContent = "X";
+    del.onclick = function(){ S.caps.splice(i, 1); refreshAll(); }; td2(del);
+    tb.appendChild(tr);
+  });
+}
+// ---------- 회로도 (색상 구분) ----------
+// 기호: TFT 파랑 / C 초록 / D 빨강. 배선: 전원 주황 / 신호 보라 / 내부넷 검정.
+// 만나는 점=접속, 점 없이 교차=비접속.
+var COL_T = "#1a56db", COL_C = "#12805c", COL_D = "#c81e1e";
+var COL_PWR = "#b45309", COL_SIG = "#7c3aed", COL_NET = "#111";
+function netColor(n){
+  if (isSupply2(n)) return COL_PWR;
+  if (isSig2(n)) return COL_SIG;
+  return COL_NET;
+}
+// draw() 안에서 쓰는 판별 (rail/sig 목록이 draw 지역이라 전역 더블버퍼로 둠)
+var _supplyNets = ["VGH","VGL","ELVDD","ELVSS","VINT","VOBS","DATA"];
+var _sigNets = ["FLM","CLK1","CLK2","OUT","IN","FLM2","GM","GO","GI","GC","GW","EM","GO","SCAN","SCAN2","VSCAN"];
+function isSupply2(n){ return _supplyNets.indexOf(n) >= 0; }
+function isSig2(n){ return _sigNets.indexOf(n) >= 0; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function activeTfts(){ return S.order.filter(function(n){ return S.tfts[n] && S.tfts[n].on; }); }
+function activeDiodes(){ return (S.diodes || []).filter(function(d){ return d.on; }); }
+// 모든 단자 좌표 수집: 단자마다 고유 XY (기호 단자 끝점)
+function collectTerms(){
+  // 반환: terms (kind T/C/D). driver T8 S=B 오기재(Q2여야 함) 자동 보정
+  var names = activeTfts();
+  var caps = S.mode === "driver" ? S.caps.filter(function(c){ return c.on; }) : [];
+  var diodes = activeDiodes();
+  var perRow = 4, cellW = 220, cellH = 200, left = 30, top = 90;
+  function grid(i){ return [left + (i % perRow) * cellW + cellW / 2, top + Math.floor(i / perRow) * cellH + cellH / 2]; }
+  var terms = [], idx = 0, p;
+  names.forEach(function(name){
+    var t = S.tfts[name]; p = grid(idx++);
+    var cx = p[0] - 10, cy = p[1];
+    terms.push({kind:"T", name:name, t:t, cx:cx, cy:cy,
+      pins:[{pin:"G", net:t.G, x:cx - 42, y:cy}, {pin:"D", net:t.D, x:cx + 38, y:cy - 24},
+            {pin:"S", net:t.S, x:cx + 38, y:cy + 24}]});
+  });
+  caps.forEach(function(c){
+    p = grid(idx++);
+    terms.push({kind:"C", name:c.name, c:c, cx:p[0], cy:p[1],
+      pins:[{pin:"A", net:c.a, x:p[0], y:p[1] - 40}, {pin:"B", net:c.b, x:p[0], y:p[1] + 40}]});
+  });
+  diodes.forEach(function(d){
+    p = grid(idx++);
+    terms.push({kind:"D", name:d.name, d:d, cx:p[0] - 10, cy:p[1],
+      pins:[{pin:"A", net:d.a, x:p[0] - 44, y:p[1]}, {pin:"K", net:d.k, x:p[0] + 44, y:p[1]}]});
+  });
+  return {terms:terms, perRow:perRow, cellW:cellW, cellH:cellH, left:left, top:top,
+    rows:Math.max(1, Math.ceil(idx / perRow))};
+}
+// FET 기호 (TFT 파랑, x,y = 채널 중심, P 게이트 버블 / N 소스 화살)
+function fetSymTb(name, t, x, y){
+  var C = COL_T, s = "";
+  s += '<text x="' + x + '" y="' + (y - 56) + '" font-size="14" text-anchor="middle" font-weight="bold" fill="' + C + '">' + esc(name) + '</text>';
+  s += '<text x="' + x + '" y="' + (y - 42) + '" font-size="10" text-anchor="middle" fill="#555">' + t.W + 'u/' + t.L + 'u ' + (t.type === "P" ? "PMOS" : "NMOS") + '</text>';
+  s += '<line x1="' + x + '" y1="' + (y - 24) + '" x2="' + x + '" y2="' + (y + 24) + '" stroke="' + C + '" stroke-width="3.2"/>';
+  s += '<line x1="' + x + '" y1="' + (y - 24) + '" x2="' + (x + 38) + '" y2="' + (y - 24) + '" stroke="' + C + '" stroke-width="2"/>';
+  s += '<line x1="' + x + '" y1="' + (y + 24) + '" x2="' + (x + 38) + '" y2="' + (y + 24) + '" stroke="' + C + '" stroke-width="2"/>';
+  var gx = x - 12;
+  s += '<line x1="' + gx + '" y1="' + (y - 26) + '" x2="' + gx + '" y2="' + (y + 26) + '" stroke="' + C + '" stroke-width="3.2"/>';
+  if (t.type === "P"){
+    s += '<circle cx="' + (gx - 7) + '" cy="' + y + '" r="5" fill="#fff" stroke="' + C + '" stroke-width="2"/>';
+    s += '<line x1="' + (gx - 12) + '" y1="' + y + '" x2="' + (gx - 42) + '" y2="' + y + '" stroke="' + C + '" stroke-width="2"/>';
+  } else {
+    s += '<line x1="' + gx + '" y1="' + y + '" x2="' + (gx - 42) + '" y2="' + y + '" stroke="' + C + '" stroke-width="2"/>';
+    s += '<polygon points="' + x + ',' + (y + 24) + ' ' + (x - 8) + ',' + (y + 14) + ' ' + (x + 8) + ',' + (y + 14) + '" fill="' + C + '"/>';
+  }
+  return s;
+}
+// CAP 기호: 두 장 판 (위 A / 아래 B, 초록)
+function capSymTb(c, x, y){
+  var C = COL_C, s = "";
+  s += '<line x1="' + (x - 18) + '" y1="' + (y - 6) + '" x2="' + (x + 18) + '" y2="' + (y - 6) + '" stroke="' + C + '" stroke-width="2.6"/>';
+  s += '<line x1="' + (x - 18) + '" y1="' + (y + 6) + '" x2="' + (x + 18) + '" y2="' + (y + 6) + '" stroke="' + C + '" stroke-width="2.6"/>';
+  s += '<line x1="' + x + '" y1="' + (y - 40) + '" x2="' + x + '" y2="' + (y - 6) + '" stroke="' + C + '" stroke-width="2"/>';
+  s += '<line x1="' + x + '" y1="' + (y + 6) + '" x2="' + x + '" y2="' + (y + 40) + '" stroke="' + C + '" stroke-width="2"/>';
+  s += '<text x="' + x + '" y="' + (y - 48) + '" font-size="13" text-anchor="middle" font-weight="bold" fill="' + C + '">' + esc(c.name) + '</text>';
+  s += '<text x="' + x + '" y="' + (y + 56) + '" font-size="10" text-anchor="middle" fill="#555">' + c.pf + 'pF</text>';
+  return s;
+}
+// DIODE 기호: 삼각(anode) + 바(cathode, 빨강)
+function diodeSymTb(d, x, y){
+  var C = COL_D, s = "";
+  s += '<polygon points="' + (x - 13) + ',' + (y - 18) + ' ' + (x - 13) + ',' + (y + 18) + ' ' + (x + 13) + ',' + y + '" fill="#fff" stroke="' + C + '" stroke-width="2"/>';
+  s += '<line x1="' + (x + 13) + '" y1="' + (y - 18) + '" x2="' + (x + 13) + '" y2="' + (y + 18) + '" stroke="' + C + '" stroke-width="2.6"/>';
+  s += '<line x1="' + (x - 44) + '" y1="' + y + '" x2="' + (x - 13) + '" y2="' + y + '" stroke="' + C + '" stroke-width="2"/>';
+  s += '<line x1="' + (x + 13) + '" y1="' + y + '" x2="' + (x + 44) + '" y2="' + y + '" stroke="' + C + '" stroke-width="2"/>';
+  s += '<text x="' + x + '" y="' + (y - 26) + '" font-size="13" text-anchor="middle" font-weight="bold" fill="' + C + '">' + esc(d.name) + '</text>';
+  return s;
+}
+function draw(){
+  var lay = collectTerms(), terms = lay.terms;
+  var rows = lay.rows, Wpx = lay.perRow * lay.cellW + 60, Hpx = rows * lay.cellH + 170;
+  var railTop = 34, railBot = Hpx - 34;
+  // 넷별 단자 수
+  var byNet = {};
+  terms.forEach(function(g){ g.pins.forEach(function(p){ p.gx = g.cx; (byNet[p.net] = byNet[p.net] || []).push(p); }); });
+  // 전원넷: DC 전압원(V)이 물린 넷만. 전부 상하 레일로 올린다.
+  // 위 레일(양전압): VGH, ELVDD, VOBS, DATA / 아래 레일(음전압/기준): VGL, ELVSS, VINT
+  var railTopNets = (S.mode === "driver") ? ["VGH"] : ["VGH", "ELVDD", "VOBS", "DATA"];
+  var railBotNets = (S.mode === "driver") ? ["VGL"] : ["VGL", "ELVSS", "VINT"];
+  var supplyNets = railTopNets.concat(railBotNets);
+  var sigNets = (S.mode === "driver")
+    ? ["FLM", "CLK1", "CLK2", "OUT", "IN", "FLM2", "GM", "GO"]
+    : ["GI", "GC", "GW", "EM", "GO", "SCAN", "SCAN2", "VSCAN"];
+  function isSupply(n){ return supplyNets.indexOf(n) >= 0; }
+  function isSig(n){ return sigNets.indexOf(n) >= 0; }
+  function isPower(n){ return isSupply(n) || isSig(n); }
+  var busNets = Object.keys(byNet).filter(function(n){ return !isPower(n) && byNet[n].length >= 2 && !isSig(n); });
+  // 무게중심순 정렬: 연결된 단자들의 평균 x가 왼쪽인 버스부터 배치 (배선 꼬임 최소화)
+  var meanX = {};
+  busNets.forEach(function(n){
+    var xs = byNet[n].map(function(p){ return p.gx; });
+    meanX[n] = xs.reduce(function(a, b){ return a + b; }, 0) / xs.length;
+  });
+  busNets.sort(function(a, b){ return meanX[a] - meanX[b]; });
+  var nBus = busNets.length;
+  var busTop = 62, busBot = railBot - 28;
+  var busX = {};
+  busNets.forEach(function(n, i){
+    busX[n] = 40 + (i + 0.5) * ((Wpx - 80) / Math.max(1, nBus));
+  });
+  var s = '<svg width="' + Wpx + '" height="' + Hpx + '" xmlns="http://www.w3.org/2000/svg">';
+  s += '<style>text{font-family:sans-serif}</style>';
+  s += '<rect x="0" y="0" width="' + Wpx + '" height="' + Hpx + '" fill="#fff"/>';
+  // 전원 공통선: VGH 위, VGL 아래. pixel은 ELVDD/ELVSS/VINT/VOBS/DATA도 전원 스터브로.
+  function railLabel(x, y, name, volt){
+    s += '<text x="' + x + '" y="' + y + '" font-size="12" font-weight="bold">' + esc(name) + '</text>';
+    if (volt !== undefined)
+      s += '<text x="' + x + '" y="' + (y + 13) + '" font-size="10" fill="#555">' + volt + 'V</text>';
+  }
+  s += '<rect x="0" y="0" width="' + Wpx + '" height="24" fill="#e8eef6"/>';
+  s += '<text x="10" y="17" font-size="12" fill="#333" font-weight="bold">연결도</text>';
+  s += '<text x="' + (Wpx - 430) + '" y="17" font-size="11" fill="' + COL_T + '">TFT</text>';
+  s += '<text x="' + (Wpx - 390) + '" y="17" font-size="11" fill="' + COL_C + '">C</text>';
+  s += '<text x="' + (Wpx - 360) + '" y="17" font-size="11" fill="' + COL_D + '">D/OLED</text>';
+  s += '<text x="' + (Wpx - 280) + '" y="17" font-size="11" fill="' + COL_PWR + '">전원</text>';
+  s += '<text x="' + (Wpx - 230) + '" y="17" font-size="11" fill="' + COL_SIG + '">신호</text>';
+  s += '<text x="' + (Wpx - 180) + '" y="17" font-size="11" fill="#111">내부넷</text>';
+  // 위/아래 레일: 전원넷마다 레일 1줄씩 (이름 + 전압 표시)
+  var railGap = 22, railX0 = 120;
+  var railTopY = {}, railBotY = {};
+  railTopNets.forEach(function(n, i){
+    if (!byNet[n]) return;
+    var y = railTop + i * railGap;
+    railTopY[n] = y;
+    railLabel(8, y + 4, n, S.P[n]);
+    s += '<line x1="' + railX0 + '" y1="' + y + '" x2="' + (Wpx - 20) + '" y2="' + y + '" stroke="' + COL_PWR + '" stroke-width="2.4"/>';
+  });
+  railBotNets.forEach(function(n, i){
+    if (!byNet[n]) return;
+    var y = railBot - i * railGap;
+    railBotY[n] = y;
+    railLabel(8, y + 4, n, S.P[n]);
+    s += '<line x1="' + railX0 + '" y1="' + y + '" x2="' + (Wpx - 20) + '" y2="' + y + '" stroke="' + COL_PWR + '" stroke-width="2.4"/>';
+  });
+  // 좌측 신호열: 교과서 순서대로 (위: 스캔/클럭계, 아래: 출력/데이터계)
+  var sigOrder = (S.mode === "driver")
+    ? ["FLM", "CLK1", "CLK2", "IN", "OUT", "FLM2", "GM", "GO"]
+    : ["SCAN", "SCAN2", "VSCAN", "GI", "GC", "GW", "EM", "GO", "DATA", "ANODE"];
+  var usedSig = sigOrder.filter(function(n){ return byNet[n]; });
+  sigNets.filter(function(n){ return byNet[n] && usedSig.indexOf(n) < 0; }).forEach(function(n){ usedSig.push(n); });
+  var sigX = 64, sigY0 = busTop + 6, sigDY = 30;
+  var sigY = {};
+  usedSig.forEach(function(n, i){ sigY[n] = sigY0 + i * sigDY; });
+  // 신호행이 소자 영역을 가로지르면 복잡해진다. 행은 좌측 여백에만 짧게.
+  var sigLen = 110;
+  // 내부넷 버스: 3곳 이상 공유하는 넷만 세운다 (2핀 1:1은 직결 처리됨)
+  var bigBus = busNets.filter(function(n){ return (byNet[n] || []).length >= 3; });
+  var nBig = bigBus.length;
+  var busX = {};
+  bigBus.forEach(function(n, i){
+    busX[n] = 40 + (i + 0.5) * ((Wpx - 80) / Math.max(1, nBig));
+  });
+  bigBus.forEach(function(n){
+    var x = busX[n];
+    s += '<line x1="' + x + '" y1="' + busTop + '" x2="' + x + '" y2="' + busBot + '" stroke="#111" stroke-width="1.6"/>';
+    s += '<text x="' + x + '" y="' + (busTop - 8) + '" font-size="12" text-anchor="middle" font-weight="bold">' + esc(n) + '</text>';
+  });
+  // 좌측 신호열 그리기 (짧은 행, 소자 영역 침범 안 함, 보라)
+  usedSig.forEach(function(n){
+    var y = sigY[n];
+    s += '<circle cx="' + (sigX - 12) + '" cy="' + y + '" r="4" fill="#fff" stroke="' + COL_SIG + '" stroke-width="2"/>';
+    s += '<text x="' + (sigX - 20) + '" y="' + (y + 4) + '" font-size="12" text-anchor="end" font-weight="bold" fill="' + COL_SIG + '">' + esc(n) + '</text>';
+    s += '<line x1="' + sigX + '" y1="' + y + '" x2="' + (sigX + sigLen) + '" y2="' + y + '" stroke="' + COL_SIG + '" stroke-width="1.4"/>';
+  });
+  // 기호
+  terms.forEach(function(g){
+    if (g.kind === "T") s += fetSymTb(g.name, g.t, g.cx, g.cy);
+    else if (g.kind === "C") s += capSymTb(g.c, g.cx, g.cy);
+    else s += diodeSymTb(g.d, g.cx, g.cy);
+  });
+  // 배선: 단자 -> 목적지 (직각 1회 꺾기, 넷 색상 + 접속점)
+  function wire(x1, y1, x2, y2, dot1, dot2, col){
+    var C = col || "#111";
+    if (Math.abs(x1 - x2) < 1 || Math.abs(y1 - y2) < 1){
+      s += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + C + '" stroke-width="1.8"/>';
+    } else {
+      // 교과서식: 목적지(버스) 쪽에 수직선을 세우고 단자에서 수평으로 붙는다
+      var vx = x2 + (x1 < x2 ? -10 : 10);
+      s += '<polyline points="' + x1 + ',' + y1 + ' ' + vx + ',' + y1 + ' ' + vx + ',' + y2 + ' ' + x2 + ',' + y2 + '" fill="none" stroke="' + C + '" stroke-width="1.8"/>';
+    }
+    if (dot1) s += '<circle cx="' + x1 + '" cy="' + y1 + '" r="3.4" fill="' + C + '"/>';
+    if (dot2) s += '<circle cx="' + x2 + '" cy="' + y2 + '" r="3.4" fill="' + C + '"/>';
+  }
+  terms.forEach(function(g){
+    g.pins.forEach(function(p){
+      var peers = byNet[p.net] || [];
+      var pc = netColor(p.net);
+      if (railTopY[p.net] !== undefined){ wire(p.x, p.y, p.x, railTopY[p.net], false, true, COL_PWR); return; }
+      if (railBotY[p.net] !== undefined){ wire(p.x, p.y, p.x, railBotY[p.net], false, true, COL_PWR); return; }
+      if (isSig(p.net)){
+        // 신호넷: 같은 넷 단자들이 신호행에 붙는다.
+        // 단자가 1개면 짧은 스터브 + 이름만 (선 길게 끌지 않음).
+        // 2개면 둘 사이 직결 + 중간에서 신호행으로 짧게 1선 (가지 최소화).
+        // 3개 이상이면 각자 신호행에 직각 1회 연결.
+        var sy2 = sigY[p.net];
+        if (peers.length === 1){
+          var ex1 = p.x + (p.x < sigX + sigLen ? 26 : -26);
+          s += '<line x1="' + p.x + '" y1="' + p.y + '" x2="' + ex1 + '" y2="' + p.y + '" stroke="' + COL_SIG + '" stroke-width="1.8"/>';
+          s += '<text x="' + (ex1 + 5) + '" y="' + (p.y - 5) + '" font-size="11" font-weight="bold" fill="' + COL_SIG + '">' + esc(p.net) + '</text>';
+          return;
+        }
+        if (peers.length === 2){
+          if (p.drawn2) return;
+          var q2 = peers[0] === p ? peers[1] : peers[0];
+          p.drawn2 = true; q2.drawn2 = true;
+          var midx = (p.x + q2.x) / 2;
+          if (Math.abs(p.y - q2.y) < 1){
+            s += '<line x1="' + p.x + '" y1="' + p.y + '" x2="' + q2.x + '" y2="' + q2.y + '" stroke="' + COL_SIG + '" stroke-width="1.8"/>';
+            s += '<line x1="' + midx + '" y1="' + p.y + '" x2="' + midx + '" y2="' + sy2 + '" stroke="' + COL_SIG + '" stroke-width="1.4"/>';
+            s += '<line x1="' + midx + '" y1="' + sy2 + '" x2="' + (sigX + sigLen) + '" y2="' + sy2 + '" stroke="' + COL_SIG + '" stroke-width="1.4"/>';
+          } else {
+            s += '<polyline points="' + p.x + ',' + p.y + ' ' + midx + ',' + p.y + ' ' + midx + ',' + q2.y + ' ' + q2.x + ',' + q2.y + '" fill="none" stroke="' + COL_SIG + '" stroke-width="1.8"/>';
+            s += '<line x1="' + midx + '" y1="' + ((p.y + q2.y) / 2) + '" x2="' + midx + '" y2="' + sy2 + '" stroke="' + COL_SIG + '" stroke-width="1.4"/>';
+            s += '<line x1="' + midx + '" y1="' + sy2 + '" x2="' + (sigX + sigLen) + '" y2="' + sy2 + '" stroke="' + COL_SIG + '" stroke-width="1.4"/>';
+          }
+          s += '<circle cx="' + midx + '" cy="' + sy2 + '" r="3" fill="' + COL_SIG + '"/>';
+          return;
+        }
+        if (Math.abs(p.y - sy2) < 1){
+          s += '<line x1="' + sigX + '" y1="' + sy2 + '" x2="' + p.x + '" y2="' + p.y + '" stroke="' + COL_SIG + '" stroke-width="1.8"/>';
+        } else {
+          s += '<polyline points="' + sigX + ',' + sy2 + ' ' + p.x + ',' + sy2 + ' ' + p.x + ',' + p.y + '" fill="none" stroke="' + COL_SIG + '" stroke-width="1.8"/>';
+        }
+        s += '<circle cx="' + sigX + '" cy="' + sy2 + '" r="3.2" fill="' + COL_SIG + '"/>';
+        s += '<circle cx="' + p.x + '" cy="' + sy2 + '" r="3.2" fill="' + COL_SIG + '"/>';
+        return;
+      }
+      if (peers.length === 2){
+        // 1:1 연결: 두 단자 사이 직선으로 바로 잇기 (버스 안 세움)
+        var q = peers[0] === p ? peers[1] : peers[0];
+        if (p.drawn2){ return; }
+        p.drawn2 = true; q.drawn2 = true;
+        if (Math.abs(p.y - q.y) < 1 || Math.abs(p.x - q.x) < 1){
+          wire(p.x, p.y, q.x, q.y, false, false, pc);
+        } else {
+          s += '<polyline points="' + p.x + ',' + p.y + ' ' + p.x + ',' + q.y + ' ' + q.x + ',' + q.y + '" fill="none" stroke="' + pc + '" stroke-width="1.8"/>';
+        }
+        s += '<circle cx="' + p.x + '" cy="' + p.y + '" r="3" fill="' + pc + '"/>';
+        s += '<circle cx="' + q.x + '" cy="' + q.y + '" r="3" fill="' + pc + '"/>';
+      } else if (peers.length >= 3 && busX[p.net] !== undefined){
+        // 버스선에 수직으로 접속 (단자 -> 버스 x좌표 -> 버스선)
+        var bx = busX[p.net];
+        var by = Math.max(busTop + 4, Math.min(busBot - 4, p.y));
+        wire(p.x, p.y, bx, by, false, true, pc);
+      } else {
+        // 혼자 쓰는 넷: 짧은 스터브 + 이름
+        var ddx = (g.kind === "T" && p.pin !== "G") ? 1 : (g.kind === "D" ? (p.pin === "A" ? -1 : 1) : 1);
+        var ex = p.x + ddx * 30;
+        if (g.kind === "C") ex = p.x + 40;
+        s += '<line x1="' + p.x + '" y1="' + p.y + '" x2="' + ex + '" y2="' + p.y + '" stroke="' + pc + '" stroke-width="1.8"/>';
+        s += '<circle cx="' + ex + '" cy="' + p.y + '" r="2.6" fill="#fff" stroke="' + pc + '" stroke-width="1.4"/>';
+        s += '<text x="' + (ex + 5) + '" y="' + (p.y - 5) + '" font-size="11" font-weight="bold" fill="' + pc + '">' + esc(p.net) + '</text>';
+      }
+    });
+  });
+  // OUT 출력 스터브 (마지막 TR의 OUT 단자에 화살)
+  s += "</svg>";
+  s += "</svg>";
+  // 전원부 분리: 표 한 줄 (전원넷 - 전압 - 붙는 단자). svg 없이 텍스트로 간단히.
+  var supList = supplyNets.filter(function(n){ return byNet[n]; });
+  var ph = '<div style="font-size:12px;margin-top:8px;border-top:1px solid #ccc;padding-top:6px">';
+  ph += '<b>전원부</b> ';
+  ph += supList.map(function(n){
+    var pv2 = (S.P[n] !== undefined) ? S.P[n] + "V" : "";
+    var users = (byNet[n] || []).map(function(q){
+      var owner = "?";
+      terms.forEach(function(g){ g.pins.forEach(function(gp){ if (gp === q) owner = g.name + "." + q.pin; }); });
+      return owner;
+    });
+    return esc(n) + (pv2 ? "(" + pv2 + ")" : "") + ": " + esc(users.join(", "));
+  }).join(" / ");
+  ph += "</div>";
+  document.getElementById("schem").innerHTML = s + ph;
+}
+// ---------- .cir 생성 ----------
+function pinMap(n){
+  if (S.mode !== "driver") return n;
+  if (n === "FLM") return "IN";
+  if (n === "CLK1") return "CKA";
+  if (n === "CLK2") return "CKB";
+  return n;
+}
+function pwl(segs, rest){
+  var pts = [[0, rest]];
+  segs.forEach(function(sg){
+    if (sg[1] <= 0 || sg[0] >= TEND_G) return;
+    var a = Math.max(sg[0], 0);
+    pts.push([a, rest], [a + TR_G, sg[2]], [sg[1], sg[2]], [sg[1] + TR_G, rest]);
+  });
+  pts.sort(function(a, b){ return a[0] - b[0]; });
+  return pts.map(function(p){ return p[0].toFixed(4) + "u " + p[1]; }).join(" ");
+}
+var TEND_G = 0, TR_G = 0;
+function cirDriver(){
+  var P = S.P, H = 1000 / P.freq, PP = 2 * H, PW = 0.75 * H, TR = PP * 0.00625;
+  var N = Math.max(1, Math.round(P.stages)), F = Math.max(1, Math.round(P.frames));
+  var K = Math.ceil((N + P.startW) / 2) + 8, FP = PP * K, SETTLE = 4 * PP;
+  var T0 = SETTLE + PP, T0s = [], f;
+  for (f = 0; f < F; f++) T0s.push(T0 + f * FP);
+  TEND_G = T0 + F * FP; TR_G = TR;
+  function clksegs(off){
+    var segs = [], t = T0 - 4 * PP + off;
+    while (t < TEND_G){ if (t + PW < TEND_G + PP) segs.push([t, t + PW, P.VGL]); t += PP; }
+    return segs;
+  }
+  var c1 = pwl(clksegs(0), P.VGH), c2 = pwl(clksegs(PP / 2), P.VGH);
+  var flm = P.polarity === "low_pulse"
+    ? pwl(T0s.map(function(t0){ return [t0 - 0.5, t0 + PW + 0.5, P.VGL]; }), P.VGH)
+    : pwl(T0s.map(function(t0){ return [t0 - H / 2, t0 - H / 2 + P.startW * H, P.VGH]; }), P.VGL);
+  var L = ["* scheditor driver H=" + H.toFixed(3) + "us f=" + P.freq + "kHz VGH=" + P.VGH +
+    " VGL=" + P.VGL + " pol=" + P.polarity + " W=" + P.startW + "H"];
+  activeTfts().forEach(function(name){
+    var t = S.tfts[name], pol = t.type === "N" ? -1 : 1;
+    L.push(".model m" + name + " ptft_fit W=" + t.W + "u L=" + t.L + "u VT0=1.1000 U0=65.000 POL=" +
+      pol + " SS=0.3000 GOFF=1.000e-14");
+  });
+  L.push(".subckt gstage IN CKA CKB OUT VGH VGL");
+  activeTfts().forEach(function(name){
+    var t = S.tfts[name];
+    L.push("N_" + name + " " + pinMap(t.D) + " " + pinMap(t.G) + " " + pinMap(t.S) + " m" + name);
+  });
+  S.caps.forEach(function(c){ if (c.on) L.push(c.name + " " + pinMap(c.a) + " " + pinMap(c.b) + " " + c.pf + "p"); });
+  diodeCirLines().forEach(function(l){
+    if (l.indexOf(".model") === 0){ L.push(l); return; }
+    var p = l.split(" ");
+    L.push(p[0] + " " + pinMap(p[1]) + " " + pinMap(p[2]) + " " + p[3]);
+  });
+  if (P.cload) L.push("CL OUT 0 " + P.cload + "p");
+  L.push(".ends", "VGH VGH 0 " + P.VGH, "VGL VGL 0 " + P.VGL,
+    "VFLM FLM 0 PWL(" + flm + ")", "VCLK1 CLK1 0 PWL(" + c1 + ")", "VCLK2 CLK2 0 PWL(" + c2 + ")");
+  var prev = "FLM", i;
+  for (i = 1; i <= N; i++){
+    var ck = i % 2 ? ["CLK1", "CLK2"] : ["CLK2", "CLK1"];
+    L.push("X" + i + " " + prev + " " + ck[0] + " " + ck[1] + " OUT" + i + " VGH VGL gstage");
+    prev = "OUT" + i;
+  }
+  var outs = []; for (i = 1; i <= N; i++) outs.push("v(OUT" + i + ")");
+  var inn = {}, nodes = [];
+  activeTfts().forEach(function(name){ var t = S.tfts[name];
+    ["G","S","D"].forEach(function(p){ inn[t[p]] = 1; }); });
+  S.caps.forEach(function(c){ if (c.on){ inn[c.a] = 1; inn[c.b] = 1; } });
+  Object.keys(inn).forEach(function(n){
+    if (["VGH","VGL","FLM","CLK1","CLK2","OUT","IN","0"].indexOf(n) < 0) nodes.push("v(x1." + n.toLowerCase() + ")");
+  });
+  L.push(".options method=gear reltol=1e-4 abstol=1e-12 vntol=1e-6 gmin=1e-12",
+    ".control", "pre_osdi ptft_fit.osdi", "tran 10n " + TEND_G.toFixed(3) + "u 0 20n",
+    "set wr_singlescale", "set wr_vecnames",
+    "wrdata out.txt v(FLM) v(CLK1) v(CLK2) " + outs.join(" ") + " " + nodes.join(" "), ".endc", ".end");
+  return L.join("\n") + "\n";
+}
+function cirPixel(){
+  var P = S.P, F = 1e6 / P.frameHz, TEND = 2 * F, TR = 0.1, L = [];
+  L.push("* scheditor 8T1C pixel DATA=" + P.DATA + " frame=" + F.toFixed(0) + "us");
+  activeTfts().forEach(function(name){
+    var t = S.tfts[name], fresh = t.type === "N" ? P.VT0N : P.VT0P, pol = t.type === "N" ? -1 : 1;
+    L.push(".model m" + name + " ptft_fit W=" + t.W + "u L=" + t.L + "u VT0=" + fresh.toFixed(4) +
+      " U0=65.000 POL=" + pol + " SS=0.3000 GOFF=1.000e-14");
+    L.push("N_" + name + " " + t.D + " " + t.G + " " + t.S + " m" + name);
+  });
+  // 쓰는 넷 집계 (G/S/D 전부 + C 양단)
+  var usedCtl = {};
+  activeTfts().forEach(function(name){ var t = S.tfts[name];
+    usedCtl[t.G] = 1; usedCtl[t.S] = 1; usedCtl[t.D] = 1; });
+  S.caps.forEach(function(c){ if (c.on){ usedCtl[c.a] = 1; usedCtl[c.b] = 1; } });
+  if (usedCtl["NG"]) L.push("Cst NG ELVDD " + P.Cst + "p");
+  else L.push("* no-NG node: Cst skipped");
+  S.caps.forEach(function(c){ if (c.on) L.push(c.name + " " + c.a + " " + c.b + " " + c.pf + "p"); });
+  L.push("Coled ANODE ELVSS " + P.Coled + "p",
+    "VELVDD ELVDD 0 " + P.ELVDD, "VELVSS ELVSS 0 " + P.ELVSS, "VVINT VINT 0 " + P.VINT,
+    "VVOBS VOBS 0 " + P.VOBS, "VDATA DATA 0 " + P.DATA, "VVGH VGH 0 " + P.VGH, "VVGL VGL 0 " + P.VGL);
+  var timing = {GI:[0,30],GO:[40,70],GW:[80,110],GC:[80,110],EM:[150,8300],VSCAN:[80,110]};
+  var rest, act;
+  ["GI","GC","GW","EM","GO"].forEach(function(sig){
+    if (!usedCtl[sig]) return;
+    if (sig === "GI" || sig === "GC"){ rest = P.VGL; act = P.VGH; } else { rest = P.VGH; act = P.VGL; }
+    var a = timing[sig][0], b = Math.min(timing[sig][1], F - 1), pts = [[0, rest]], f0;
+    [0, F].forEach(function(f0){
+      pts.push([f0 + a, rest], [f0 + a + TR, act], [f0 + b, act], [f0 + b + TR, rest]); });
+    L.push("V" + sig + " " + sig + " 0 PWL(" +
+      pts.map(function(p){ return p[0].toFixed(3) + "u " + p[1]; }).join(" ") + ")");
+  });
+  var dlAll = diodeCirLines();
+  var dl2 = dlAll.filter(function(l){ return l.indexOf(".model") !== 0; });
+  var dlM = dlAll.filter(function(l){ return l.indexOf(".model") === 0; });
+  if (dl2.length === 0) { dl2 = ["Doled ANODE N_OLED oled"]; dlM = [".model oled D(IS=1e-15 N=1.2 RS=300K)"]; }
+  dl2.forEach(function(l){ L.push(l); });
+  dlM.forEach(function(l){ L.push(l); });
+  if (dl2.some(function(l){ return l.indexOf("N_OLED") >= 0; })) L.push("Vsense N_OLED ELVSS 0");
+  L.push(".options method=gear reltol=1e-4 abstol=1e-13 vntol=1e-6 gmin=1e-12",
+    ".control", "pre_osdi ptft_fit.osdi", "tran 50n " + TEND.toFixed(2) + "u 0 1u",
+    "set wr_singlescale", "set wr_vecnames",
+    "wrdata out.txt v(GI) v(GC) v(GW) v(EM) v(GO) v(NG) v(NS) v(ND) v(ANODE) v(DATA) i(Vsense) " +
+    Object.keys(usedCtl).filter(function(n){ return ["GI","GC","GW","EM","GO","NG","NS","ND","ANODE","DATA"].indexOf(n) < 0; })
+      .map(function(n){ return "v(" + n + ")"; }).join(" "),
+    ".endc", ".end");
+  return L.join("\n") + "\n";
+}
+function renderDiodes(){
+  var dl = document.getElementById("netList");
+  var tb = document.getElementById("diodeBody"); tb.innerHTML = "";
+  (S.diodes || []).forEach(function(d, i){
+    var tr = document.createElement("tr");
+    function td2(el){ var cc = document.createElement("td"); cc.appendChild(el); tr.appendChild(cc); }
+    var nm = document.createElement("input"); nm.className = "net"; nm.value = d.name;
+    nm.onchange = function(){ d.name = nm.value.trim() || d.name; draw(); makeCir(); }; td2(nm);
+    var on = document.createElement("input"); on.type = "checkbox"; on.checked = d.on;
+    on.onchange = function(){ d.on = on.checked; draw(); makeCir(); }; td2(on);
+    td2(netInput(d.a, function(v){ d.a = v; }));
+    td2(netInput(d.k, function(v){ d.k = v; }));
+    var md = document.createElement("input"); md.className = "net"; md.style.width = "90px"; md.value = d.model || "oled";
+    md.onchange = function(){ d.model = md.value.trim() || "oled"; makeCir(); }; td2(md);
+    var del = document.createElement("button"); del.textContent = "X";
+    del.onclick = function(){ S.diodes.splice(i, 1); refreshAll(); }; td2(del);
+    tb.appendChild(tr);
+  });
+}
+function diodeCirLines(){
+  var out = [], hasModel = {};
+  activeDiodes().forEach(function(d){
+    out.push(d.name + " " + d.a + " " + d.k + " " + (d.model || "oled"));
+    hasModel[d.model || "oled"] = 1;
+  });
+  if (hasModel["oled"]) out.push(".model oled D(IS=1e-15 N=1.2 RS=300K)");
+  return out;
+}
+function makeCir(){
+  var cir = S.mode === "driver" ? cirDriver() : cirPixel();
+  document.getElementById("cirPrev").textContent = cir;
+  return cir;
+}
+function download(name, text, mime){
+  var b = new Blob([text], {type: mime || "text/plain"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = name; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 500);
+}
+// ---------- 버튼 ----------
+document.getElementById("loadBtn").onclick = function(){
+  loadPreset(document.getElementById("preset").value);
+};
+document.getElementById("newDrv").onclick = function(){
+  S.mode = "driver"; S.order = ["T1","T2","T3","T4"]; S.tfts = {};
+  S.order.forEach(function(n){ S.tfts[n] = {G:"VGH",S:"VGH",D:"VGH",W:4,L:4.5,type:"P",on:true}; });
+  S.caps = [{name:"C1",a:"VGH",b:"QB",pf:1.0,on:true}];
+  S.diodes = [];
+  S.P = defParams("driver"); refreshAll();
+};
+document.getElementById("newPx").onclick = function(){
+  S.mode = "pixel"; S.order = []; S.tfts = {};
+  for (var i = 1; i <= 8; i++){ var n = "T" + i;
+    S.order.push(n); S.tfts[n] = {G:"VGH",S:"VGH",D:"VGH",W:3,L:4.5,type:"P",on:true}; }
+  S.caps = [];
+  S.diodes = [{name:"Doled", a:"ANODE", k:"N_OLED", model:"oled", on:true}];
+  S.P = defParams("pixel"); refreshAll();
+};
+document.getElementById("addDiode").onclick = function(){
+  S.diodes = S.diodes || [];
+  S.diodes.push({name:"D" + (S.diodes.length + 1), a:"ANODE", k:"N_OLED", model:"oled", on:true});
+  refreshAll();
+};
+document.getElementById("addTft").onclick = function(){
+  var i = 1; while (S.tfts["T" + i]) i++;
+  var n = "T" + i;
+  S.tfts[n] = {G:"VGH",S:"VGH",D:"VGH",W:4,L:4.5,type:"P",on:true};
+  S.order.push(n); refreshAll();
+};
+document.getElementById("addCap").onclick = function(){
+  S.caps.push({name:"C" + (S.caps.length + 1), a:"VGH", b:"QB", pf:1.0, on:true});
+  refreshAll();
+};
+document.getElementById("dlCir").onclick = function(){
+  download("scheditor_" + S.mode + ".cir", makeCir());
+};
+document.getElementById("dlJson").onclick = function(){
+  download("scheditor_" + S.mode + ".json",
+    JSON.stringify({mode:S.mode, order:S.order, tfts:S.tfts, caps:S.caps, diodes:(S.diodes || []), P:S.P}, null, 1),
+    "application/json");
+};
+document.getElementById("loadJsonBtn").onclick = function(){
+  document.getElementById("loadJson").click();
+};
+document.getElementById("loadJson").onchange = function(e){
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    try {
+      var d = JSON.parse(r.result);
+      S.mode = d.mode === "pixel" ? "pixel" : "driver";
+      S.order = d.order; S.tfts = d.tfts; S.caps = d.caps || []; S.diodes = d.diodes || []; S.P = d.P;
+      refreshAll();
+    } catch (err){ alert("JSON 오류: " + err); }
+  };
+  r.readAsText(f); e.target.value = "";
+};
+loadPreset("GW");
+</script>
+</body>
+</html>
