@@ -77,7 +77,7 @@ SHELL_RE = re.compile(r"[;&|`$()<>!*?~#\\'\"/\s]")
 
 PINS = {"G", "S", "D"}
 D_GLOBAL = {"VGH", "VGL", "FLM", "CLK1", "CLK2"}
-D_INTERNAL = {"A", "B", "C", "Q", "QB"} | {f"N{i}" for i in range(1, 9)}
+D_INTERNAL = {"A", "B", "C", "Q", "Q2", "QB"} | {f"N{i}" for i in range(1, 9)}
 D_VALID = D_GLOBAL | D_INTERNAL | {"OUT", "IN"}
 D_T = {f"T{i}" for i in range(1, 13)}
 
@@ -272,7 +272,8 @@ def validate_driver(desc):
             "start_width_H": start_w, "margin_V": margin,
             "rest_spec_V": rest_spec, "width_tol_H": width_tol,
             "temp_C": temp_c,
-            "H": H, "tft": tft, "caps": caps, "cload_pf": cl}
+            "H": H, "tft": tft, "caps": caps, "cload_pf": cl,
+            "clk2_starts": _get(desc, "clk2_starts", default=None)}
     return errors, warnings, suggestions, norm
 
 
@@ -327,6 +328,11 @@ def build_driver_cir(norm, jobdir):
 
     c1 = pwl_pts(clk_segs(0), VGH)
     c2 = pwl_pts(clk_segs(P / 2), VGH)
+    # optimizer override: explicit clk2 low windows (absolute us)
+    _ov = norm.get("clk2_starts")
+    if _ov:
+        segs = [(float(s), float(s) + PW, VGL) for s in _ov]
+        c2 = pwl_pts(segs, VGH)
 
     # start signal
     if norm["polarity"] == "low_pulse":

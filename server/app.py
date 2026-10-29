@@ -45,6 +45,9 @@ class Handler(BaseHTTPRequestHandler):
                           "tft": v["tft"], "caps": v["caps"]}
             out["PIXEL"] = {"defaults": PIXEL_DEFAULTS, "tft": PIXEL_TFT}
             self._send(200, out)
+        elif u.path == "/api/opt/status":
+            import optimize
+            self._send(200, optimize.opt_status())
         elif u.path == "/api/margin":
             from urllib.parse import parse_qs
             q = parse_qs(u.query)
@@ -75,7 +78,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if self.path not in ("/api/sim", "/api/pixel", "/api/stress",
-                             "/api/margin"):
+                             "/api/margin", "/api/opt", "/api/opt/status"):
             self._send(404, {"error": "not found"})
             return
         try:
@@ -87,6 +90,23 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError):
             self._send(400, {"ok": False, "errors": ["invalid JSON body"],
                              "warnings": [], "suggestions": []})
+            return
+        if self.path == "/api/opt/status":
+            import optimize
+            self._send(200, optimize.opt_status())
+            return
+        if self.path == "/api/opt":
+            import optimize
+            iters = desc.get("iters", 60)
+            try:
+                iters = max(4, min(int(iters), 400))
+            except (TypeError, ValueError):
+                iters = 60
+            result = optimize.start_opt(
+                desc, iters=iters,
+                clk2_starts=desc.get("clk2_starts"),
+                seed=int(desc.get("seed", 1)))
+            self._send(202 if result.get("ok") else 422, result)
             return
         if self.path == "/api/margin":
             # background job: returns immediately, poll via GET

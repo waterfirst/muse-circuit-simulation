@@ -128,3 +128,12 @@
   reload per docs/DEPLOY_CIRCUIT2.md.
 - Telegram report SENT via claude_bot to 5767743818 (200 ok). Note:
   9109843678 is itself a bot id (USER_BOT_TO_BOT_DISABLED), not a chat.
+
+## 2026-10-29 — hackathon: source-trace UI + video plan
+- New SourceTrace section on LabPage (src/lib/sources.ts + component):
+  15-row EM patent-sentence table (T1..T12, C1..C3), reuse note for GC/GI,
+  honest no-trace notice for GW/EM12T2C. conn strings verified against EM12.
+- Tests 42/42 (6 files), tsc clean, vite build ok. One real catch during
+  dev: generic CKA/IN labels vs preset CLK1/FLM — unified to preset nets.
+- docs/VIDEO_PLAN_3MIN.md: 20/40/60/40/20 structure, EN narration, asset
+  list, production steps. Hero = US11205374B2 EM 4H->3H claim.

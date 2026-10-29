@@ -1,0 +1,101 @@
+{
+ "stages": 6,
+ "frames": 2,
+ "clock_mode": "continuous",
+ "polarity": "low_pulse",
+ "start_width_H": 1,
+ "temp_C": 25,
+ "preset": "GW",
+ "tft": {
+  "T1": {
+   "G": "CLK1",
+   "S": "FLM",
+   "D": "B",
+   "W": 8,
+   "L": 4.5,
+   "type": "P"
+  },
+  "T2": {
+   "G": "C",
+   "S": "VGH",
+   "D": "A",
+   "W": 4,
+   "L": 6,
+   "type": "P"
+  },
+  "T3": {
+   "G": "CLK2",
+   "S": "A",
+   "D": "B",
+   "W": 4,
+   "L": 4.5,
+   "type": "P"
+  },
+  "T4": {
+   "G": "B",
+   "S": "VGH",
+   "D": "C",
+   "W": 4,
+   "L": 4.5,
+   "type": "P"
+  },
+  "T5": {
+   "G": "CLK1",
+   "S": "QB",
+   "D": "VGL",
+   "W": 4,
+   "L": 6,
+   "type": "P"
+  },
+  "T6": {
+   "G": "QB",
+   "S": "VGH",
+   "D": "OUT",
+   "W": 40,
+   "L": 4.5,
+   "type": "P"
+  },
+  "T7": {
+   "G": "Q",
+   "S": "OUT",
+   "D": "CLK2",
+   "W": 4,
+   "L": 4.5,
+   "type": "P"
+  },
+  "T8": {
+   "G": "VGL",
+   "S": "B",
+   "D": "Q",
+   "W": 4,
+   "L": 4.5,
+   "type": "P"
+  },
+  "T9": {
+   "G": "CLK2",
+   "S": "QB",
+   "D": "C",
+   "W": 4,
+   "L": 4.5,
+   "type": "P"
+  }
+ },
+ "caps": [
+  {
+   "a": "VGH",
+   "b": "QB",
+   "pf": 1,
+   "name": "C1"
+  },
+  {
+   "a": "OUT",
+   "b": "Q",
+   "pf": 0.2,
+   "name": "C2"
+  }
+ ],
+ "VGH": 8,
+ "VGL": -9.5,
+ "freq_kHz": 250,
+ "resolution": 2160
+}

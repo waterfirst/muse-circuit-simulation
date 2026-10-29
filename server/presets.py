@@ -36,6 +36,24 @@ GW_CAPS = [
     {"a": "OUT", "b": "Q",  "pf": 0.2, "name": "C2"},
 ]
 
+# ---------------- GW10T2C (muse 10T2C, T10 NMOS, low_pulse) ----------------
+GW10T2C_TFT = {
+    "T1": {"G": "CLK1", "S": "FLM", "D": "Q2",  "W": 6,   "L": 4},
+    "T2": {"G": "QB",   "S": "VGH", "D": "A",   "W": 6,   "L": 4},
+    "T3": {"G": "CLK2", "S": "A",   "D": "Q2",  "W": 6,   "L": 4},
+    "T4": {"G": "Q2",   "S": "CLK1","D": "QB",  "W": 60,  "L": 4},
+    "T5": {"G": "CLK1", "S": "QB",  "D": "Q",   "W": 12,  "L": 4},
+    "T6": {"G": "QB",   "S": "VGH", "D": "B",   "W": 6,   "L": 4},
+    "T7": {"G": "Q",    "S": "CLK2","D": "B",   "W": 100, "L": 4},
+    "T8": {"G": "VGL",  "S": "Q2",  "D": "Q",   "W": 12,  "L": 4},
+    "T9": {"G": "B",    "S": "VGH", "D": "OUT", "W": 200, "L": 4},
+    "T10": {"G": "B",   "S": "OUT", "D": "VGL", "W": 200, "L": 4, "type": "N"},
+}
+GW10T2C_CAPS = [
+    {"a": "VGH", "b": "QB", "pf": 1.0, "name": "C1"},
+    {"a": "Q",   "b": "B",  "pf": 2.0, "name": "C2"},
+]
+
 # ---------------- EM (US11205374B2 Fig.4, high_pulse) ----------------
 # Patent M1..M12 -> T1..T12. N7 = unnamed M1-M2 series junction (assumption).
 EM_TFT = {
@@ -66,6 +84,7 @@ GI_CAPS = [dict(c) for c in EM_CAPS]
 
 DRIVER_DEFAULTS = {
     "GW": {"polarity": "low_pulse",  "start_width_H": 1, "tft": GW_TFT, "caps": GW_CAPS},
+    "GW10T2C": {"polarity": "low_pulse", "start_width_H": 1, "tft": GW10T2C_TFT, "caps": GW10T2C_CAPS},
     "EM": {"polarity": "high_pulse", "start_width_H": 4, "tft": EM_TFT, "caps": EM_CAPS},
     "GC": {"polarity": "high_pulse", "start_width_H": 2, "tft": GC_TFT, "caps": GC_CAPS},
     "GI": {"polarity": "high_pulse", "start_width_H": 2, "tft": GI_TFT, "caps": GI_CAPS},

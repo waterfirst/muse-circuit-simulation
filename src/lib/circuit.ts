@@ -1,5 +1,5 @@
 // Canonical constants + pure logic for drivers (GW/EM/GC/GI) and pixel.
-export const NETS = ["VGH","VGL","FLM","CLK1","CLK2","A","B","C","Q","QB","OUT","IN",
+export const NETS = ["VGH","VGL","FLM","CLK1","CLK2","A","B","C","Q","Q2","QB","OUT","IN",
   "N1","N2","N3","N4","N5","N6","N7","N8"] as const;
 export type Net = (typeof NETS)[number];
 export type Pin = "G" | "S" | "D";
@@ -37,32 +37,61 @@ export const EM12: Record<string, { G: Net; S: Net; D: Net; W: number; L: number
   T9:{G:"VGL",S:"N2",D:"N5",W:4,L:4.5},T10:{G:"CLK2",S:"N6",D:"N4",W:4,L:4.5},
   T11:{G:"N5",S:"N6",D:"CLK2",W:4,L:4.5},T12:{G:"N1",S:"VGH",D:"N4",W:8,L:4.5},
 };
+// User-supplied GW 10T2C. T1--T9 are PMOS; T10 is NMOS.
+export const GW10T2C: Record<string, { G: Net; S: Net; D: Net; W: number; L: number; type?: "P" | "N" }> = {
+  T1:{G:"CLK1",S:"FLM",D:"Q2",W:6,L:4},T2:{G:"QB",S:"VGH",D:"A",W:6,L:4},
+  T3:{G:"CLK2",S:"A",D:"Q2",W:6,L:4},T4:{G:"Q2",S:"CLK1",D:"QB",W:60,L:4},
+  T5:{G:"CLK1",S:"QB",D:"Q",W:12,L:4},T6:{G:"QB",S:"VGH",D:"B",W:6,L:4},
+  T7:{G:"Q",S:"CLK2",D:"B",W:100,L:4},T8:{G:"VGL",S:"Q2",D:"Q",W:12,L:4},
+  T9:{G:"B",S:"VGH",D:"OUT",W:200,L:4},T10:{G:"B",S:"OUT",D:"VGL",W:200,L:4,type:"N"},
+};
+// User-supplied EM deck. It was called 10T2C in the request, but contains
+// T1--T12 and C1--C2, so it is presented accurately as a 12T2C reference.
+export const EM12T2C: Record<string, { G: Net; S: Net; D: Net; W: number; L: number }> = {
+  T1:{G:"CLK1",S:"FLM",D:"Q",W:8,L:6},T2:{G:"QB",S:"VGH",D:"A",W:8,L:6},
+  T3:{G:"VGL",S:"CLK2",D:"A",W:4,L:4.5},T4:{G:"Q",S:"CLK1",D:"QB",W:4,L:16},
+  T5:{G:"CLK1",S:"QB",D:"VGL",W:4,L:4.5},T6:{G:"CLK2",S:"QB",D:"C",W:4,L:4.5},
+  T7:{G:"N1",S:"CLK2",D:"C",W:4,L:4.5},T8:{G:"Q",S:"VGH",D:"QB",W:4,L:4.5},
+  T9:{G:"QB",S:"VGH",D:"OUT",W:92,L:4.5},T10:{G:"N2",S:"VGL",D:"OUT",W:92,L:4.5},
+  T11:{G:"VGL",S:"QB",D:"N1",W:4,L:4.5},T12:{G:"VGL",S:"Q",D:"N2",W:4,L:4.5},
+};
 export const BROKEN: typeof VC = JSON.parse(JSON.stringify(VC));
 BROKEN.T2.D = "C";
 
 export const GW_WL: Record<string, [number, number]> =
   {T1:[8,4.5],T2:[4,6],T3:[4,4.5],T4:[4,4.5],T5:[4,6],T6:[40,4.5],T7:[4,4.5],T8:[4,4.5],T9:[4,4.5]};
 
-export type PresetName = "GW" | "EM" | "GC" | "GI";
-export const PRESETS: PresetName[] = ["GW", "EM", "GC", "GI"];
+export type PresetName = "GW" | "GW10T2C" | "EM" | "EM12T2C" | "GC" | "GI";
+export const PRESETS: PresetName[] = ["GW", "GW10T2C", "EM", "EM12T2C", "GC", "GI"];
 export const PRESET_POLARITY: Record<PresetName, "low_pulse" | "high_pulse"> =
-  { GW: "low_pulse", EM: "high_pulse", GC: "high_pulse", GI: "high_pulse" };
+  { GW: "low_pulse", GW10T2C: "low_pulse", EM: "high_pulse", EM12T2C: "high_pulse", GC: "high_pulse", GI: "high_pulse" };
 export const PRESET_WIDTH_H: Record<PresetName, number> =
-  { GW: 1, EM: 4, GC: 2, GI: 2 };
+  { GW: 1, GW10T2C: 1, EM: 4, EM12T2C: 8, GC: 2, GI: 2 };
 
 export function presetTft(p: PresetName): TftMap {
   const m = {} as TftMap;
   for (const t of TNAMES) {
-    const src = p === "GW" ? VC[t] : EM12[t];
+    const source = p === "GW" ? VC : p === "GW10T2C" ? GW10T2C : p === "EM12T2C" ? EM12T2C : EM12;
+    const src = source[t];
     if (src) {
-      const wl = p === "GW" ? GW_WL[t] : [EM12[t].W, EM12[t].L];
-      m[t] = { G: src.G, S: src.S, D: src.D, on: true, W: wl[0], L: wl[1], type: "P" };
+      const sized = src as { W?: number; L?: number; type?: "P" | "N" };
+      const wl: [number, number] = p === "GW" ? (GW_WL[t] || [4, 4.5]) :
+        [sized.W || 4, sized.L || 4.5];
+      m[t] = { G: src.G, S: src.S, D: src.D, on: true, W: wl[0], L: wl[1], type: sized.type || "P" };
     } else m[t] = { G: "VGH", S: "VGH", D: "VGH", on: false, W: 4, L: 4.5, type: "P" };
   }
   return m;
 }
 
 export function presetCaps(p: PresetName): CapConn[] {
+  if (p === "GW10T2C") return [
+    { a: "VGH", b: "QB", pf: 1.0, name: "C1", on: true },
+    { a: "Q", b: "B", pf: 2.0, name: "C2", on: true },
+  ];
+  if (p === "EM12T2C") return [
+    { a: "VGH", b: "QB", pf: 0.1, name: "C1", on: true },
+    { a: "A", b: "VGL", pf: 0.18, name: "C2", on: true },
+  ];
   if (p === "GW") return [
     { a: "VGH", b: "QB", pf: 1.0, name: "C1", on: true },
     { a: "OUT", b: "Q", pf: 0.2, name: "C2", on: true },
@@ -134,7 +163,7 @@ export const RAILS: Record<string, [number, number]> =
   {VGH:[360,20],VGL:[460,20],FLM:[40,20],CLK1:[140,20],CLK2:[240,20]};
 export const NET_COLOR: Record<string, string> =
   {VGH:"#c00000",VGL:"#0050c0",FLM:"#555555",CLK1:"#e68a00",CLK2:"#a67c00",
-   A:"#8040c0",B:"#0a8a0a",C:"#6d4c41",Q:"#00a0b0",QB:"#d0006e",OUT:"#ff0000",IN:"#666666",
+   A:"#8040c0",B:"#0a8a0a",C:"#6d4c41",Q:"#00a0b0",Q2:"#00897b",QB:"#d0006e",OUT:"#ff0000",IN:"#666666",
    N1:"#2e7d32",N2:"#9c27b0",N3:"#ef6c00",N4:"#00838f",N5:"#5d4037",N6:"#1565c0",N7:"#ad1457",N8:"#33691e"};
 
 export function pinXY(t: TName, pin: Pin): [number, number] {

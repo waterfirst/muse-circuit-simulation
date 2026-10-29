@@ -121,6 +121,36 @@ export async function getMargin(id: string, timeoutMs = 30000): Promise<MarginSt
   return null;
 }
 
+export interface OptStart { ok: boolean; job?: string; errors?: string[] }
+export interface OptStatus { running: boolean; job?: string | null; log: string[];
+  result?: { ok: boolean; best?: { n: number; frames: [number, number][]; mn: number; mx: number;
+    W: Record<string, number>; L: Record<string, number>; C: Record<string, number>; cir: string };
+    history?: number[]; errors?: string[] } | null }
+
+export async function postOpt(payload: unknown, timeoutMs = 30000): Promise<OptStart | null> {
+  try {
+    const r = await post("/api/opt", payload, timeoutMs);
+    if (r.ok || r.status === 422 || r.status === 202) return (await r.json()) as OptStart;
+  } catch { /* unreachable */ }
+  return null;
+}
+
+export async function getOptStatus(timeoutMs = 15000): Promise<OptStatus | null> {
+  for (const b of BACKENDS) {
+    try {
+      const ctl = new AbortController();
+      const to = setTimeout(() => ctl.abort(), timeoutMs);
+      try {
+        const r = await fetch(b + "/api/opt/status", { signal: ctl.signal });
+        if (r.ok) return (await r.json()) as OptStatus;
+      } finally {
+        clearTimeout(to);
+      }
+    } catch { /* next backend */ }
+  }
+  return null;
+}
+
 export async function tryBackend(desc: SimDesc, timeoutMs = 280000): Promise<SimResponse | null> {
   for (const b of BACKENDS) {
     try {

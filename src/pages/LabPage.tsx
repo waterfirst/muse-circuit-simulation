@@ -8,7 +8,9 @@ import ParamForm from "../components/ParamForm";
 import TftTable from "../components/TftTable";
 import { MarginPanel, StressPanel } from "../components/Aging";
 import CapsEditor from "../components/CapsEditor";
+import OptimizerPanel from "../components/Optimizer";
 import SchemEditor, { NetPicker } from "../components/SchemEditor";
+import SourceTrace from "../components/SourceTrace";
 import WavePlot from "../components/WavePlot";
 import demo from "../data/demo.json";
 
@@ -105,14 +107,17 @@ export default function LabPage() {
         <div className="chips">
           {PRESETS.map((p) => (
             <button key={p} className={"chip" + (preset === p ? " on" : "")}
-              onClick={() => loadPreset(p)}>{p}</button>
+              onClick={() => loadPreset(p)}>{p === "GW10T2C" ? "GW 10T2C (T10 NMOS)" :
+                p === "EM12T2C" ? "EM 12T2C (사용자 넷리스트)" : p}</button>
           ))}
           <button className="chip" onClick={() => { setPreset("GW"); setTft(presetToMap(BROKEN)); }}>
             고장 예시 (A 플로팅)</button>
         </div>
-        <p className="note">EM: Samsung US 11,205,374 B2 Fig.4 12T3C. GC/GI: 동일 스테이지 재사용(가정, 폭 2H).
-          세부 근거는 docs/CIRCUITS.md.</p>
+        <p className="note">GW 10T2C: T1~T9 PMOS, T10 NMOS 사용자 사례. EM 12T2C: 입력 넷리스트의 T1~T12/C1~C2를 그대로 반영한 사례.
+          EM: Samsung US 11,205,374 B2 Fig.4 12T3C. GC/GI: 동일 스테이지 재사용(가정, 폭 2H).
+          세부 근거는 아래 1번 표와 docs/CIRCUITS.md.</p>
       </div>
+      <SourceTrace preset={preset} />
       <ParamForm params={params} onChange={setParams} />
       <div className="card">
         <h3>2.5 회로도 (TFT를 누르면 순환 선택, 핀 직접 연결) — P는 게이트 버블</h3>
@@ -177,6 +182,21 @@ export default function LabPage() {
       <MarginPanel
         getDesc={() => buildDesc(params, tft, preset, caps) as unknown as Record<string, unknown>}
         kind="driver" />
+      <OptimizerPanel
+        getDesc={() => buildDesc(params, tft, preset, caps) as unknown as Record<string, unknown>}
+        onApply={(ntft, ncaps) => {
+          setTft((p) => {
+            const n = { ...p };
+            for (const k of Object.keys(ntft)) {
+              const t = k as keyof typeof n;
+              if (n[t]) n[t] = { ...n[t], ...(ntft as Record<string, object>)[k] };
+            }
+            return n;
+          });
+          setCaps((p) => p.map((c) =>
+            c.name === "C1" ? { ...c, pf: ncaps.C1 } :
+            c.name === "C2" ? { ...c, pf: ncaps.C2 } : c));
+        }} />
       <WavePlot series={series} info={info} enabled={enabled} lanes={lanes}
         onToggleLane={(lab) => setEnabled((p) => ({ ...p, [lab]: !p[lab] }))}
         marginReqLow={margin} />

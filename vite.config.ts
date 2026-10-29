@@ -4,6 +4,6 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // served under https://waterfirst.pro/circuit-muse/ (/circuit/ is taken)
-  base: "/circuit-muse/",
+  // Cloudflare preview is served under /circuit/.
+  base: "/circuit/",
 })

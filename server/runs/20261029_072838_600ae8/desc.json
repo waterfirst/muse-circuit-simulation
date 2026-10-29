@@ -1,0 +1,10 @@
+{
+ "kind": "driver",
+ "preset": "EM",
+ "VGH": 8.0,
+ "VGL": -9.5,
+ "freq_kHz": 250,
+ "stages": 4,
+ "frames": 2,
+ "start_width_H": 4
+}
