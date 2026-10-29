@@ -87,32 +87,6 @@ export default function ReportPage() {
         </tbody></table>
         <p className="note">원인: T2.G=FLM은 첫 프레임 스캔 펄스 때만 A를 당겨. 스캔 끝나면 A가 플로팅이라 후단으로 갈수록 B-QB 체인이 무너져. B나 Q로 물리면 스테이지 출력이 A 충전을 계속 끌고 가서 6단까지 살아.</p></div>
       <div className="card"><h2>파형 (T0-1H ~ T0+8H, H=4.0us)</h2><canvas id="plot" ref={ref}></canvas></div>
-      <div className="card"><h2>실패 사례: FLM 8H 폭 (12T2C EM driver)</h2>
-        <p className="note">증상: FLM high 약 66.56 us (8H). OUT1 high 66.75 us, OUT2 67.16 us가 FLM 폭과 일치. OUT3~OUT6 중복 펄스 3·4·5·7개. idle -0.76 ~ -1.22 V.</p>
-        <p className="note">원인: 시작 신호가 8H 유지되어 Q/QB가 8H 유지. T9 pull-up 정상이라 OUT이 FLM 폭 그대로 출력, carry chain 연속 통과로 후단 중복 펄스. N_T1~N_T12 12개라 12T2C로 표기.</p>
-        <p className="note">처방: FLM만 1H로 수정, 나머지는 손대지 말고 재실행.</p>
-        <pre>{`* 1H = 8.3333 us
-VFLM FLM 0 PWL(
-+ 0.0000u   -9.5
-+ 79.1667u  -9.5
-+ 79.2709u   8.0
-+ 87.5000u   8.0
-+ 87.6042u  -9.5
-+ 329.1667u -9.5
-+ 329.2709u  8.0
-+ 337.5000u  8.0
-+ 337.6042u -9.5
-+ 583.3333u -9.5
-+ )`}</pre>
-        <table><tbody>
-          <tr><th>항목</th><th>기대값</th></tr>
-          <tr><td>OUT1~OUT6 시작 간격</td><td>약 1H = 8.3333 us</td></tr>
-          <tr><td>각 OUT high 폭</td><td>약 1H</td></tr>
-          <tr><td>OUT3~OUT6 중복 펄스</td><td>제거</td></tr>
-          <tr><td>High level</td><td>약 VGH = 8 V</td></tr>
-        </tbody></table>
-        <p className="note">T9/T10 진단 (idle이 -9.5 V까지 안 내려가면): VS_T9SENSE·VS_T10SENSE 삽입 후 em_diag.dat 저장. low 구간 |I_T10| 작음 → Q→T12→N2→T10 경로 문제. 둘 다 큼 → contention. T10 충분한데 미달 → 모델카드·D/G/S·부하 확인.</p>
-        <p className="note">주의: C2=A-VGL이라 OUT 직접 bootstrap 없음. 구 GW의 C2=OUT-Q 진단을 그대로 적용 금지. BML·열화·C2 먼저 바꾸면 원인 섞임.</p></div>
     </div>
   );
 }

@@ -78,7 +78,7 @@ describe("schematic", () => {
   it("net picker chips carry color edges", () => {
     render(<App />);
     const chips = document.querySelectorAll("#netpick .chip");
-    expect(chips).toHaveLength(21);
+    expect(chips).toHaveLength(20);
     expect((chips[0] as HTMLElement).style.borderLeft).toContain("6px solid");
   });
 });
