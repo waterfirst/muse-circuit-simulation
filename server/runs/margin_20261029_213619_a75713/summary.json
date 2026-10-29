@@ -1,0 +1,82 @@
+{
+ "state": "done",
+ "done": 8,
+ "total": 8,
+ "kind": "driver",
+ "vgh": [
+  7.0,
+  9.0
+ ],
+ "vgl": [
+  -10.5,
+  -8.5
+ ],
+ "nominal": {
+  "VGH": 8.0,
+  "VGL": -9.5
+ },
+ "grids": {
+  "degraded": [
+   [
+    {
+     "ok": true,
+     "job": "20261029_213619_b31a14",
+     "pass": true,
+     "nfail": 0
+    },
+    {
+     "ok": true,
+     "job": "20261029_213619_6a741a",
+     "pass": true,
+     "nfail": 0
+    }
+   ],
+   [
+    {
+     "ok": true,
+     "job": "20261029_213619_a35d1a",
+     "pass": true,
+     "nfail": 0
+    },
+    {
+     "ok": true,
+     "job": "20261029_213620_b08913",
+     "pass": true,
+     "nfail": 0
+    }
+   ]
+  ],
+  "fresh": [
+   [
+    {
+     "ok": true,
+     "job": "20261029_213620_520d5d",
+     "pass": true,
+     "nfail": 0
+    },
+    {
+     "ok": true,
+     "job": "20261029_213620_a5c0eb",
+     "pass": true,
+     "nfail": 0
+    }
+   ],
+   [
+    {
+     "ok": true,
+     "job": "20261029_213621_e835ee",
+     "pass": true,
+     "nfail": 0
+    },
+    {
+     "ok": true,
+     "job": "20261029_213621_08a131",
+     "pass": true,
+     "nfail": 0
+    }
+   ]
+  ]
+ },
+ "error": "",
+ "ref_i_uA": null
+}
