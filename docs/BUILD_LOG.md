@@ -115,3 +115,16 @@
 - Runbook: docs/DEPLOY_CIRCUIT2.md (static copy, backend A/B, nginx block,
   sudo reload). Remote steps (scp, nginx, reload) need the user: sandbox
   has no tailnet/SSH route to the old laptop.
+
+## 2026-10-29 — commute handoff (option B confirmed by user)
+- User approved option B: backend on new laptop, old-laptop nginx proxies
+  via Tailscale IP. app.py now honors BIND_HOST (default 127.0.0.1).
+- Sandbox cannot keep a backend alive (detached children reaped between
+  calls; verified DEAD + empty log) and has no route to the old laptop
+  (proxy allowlists github/telegram; CONNECT to hosting IP times out;
+  no tailnet/SSH). User must: (1) start backend in own terminal with
+  BIND_HOST=$(tailscale ip -4) (expect 100.69.9.76), (2) scp
+  /tmp/c2root/circuit2/* to old ~/web/circuit2/, (3) nginx block + sudo
+  reload per docs/DEPLOY_CIRCUIT2.md.
+- Telegram report SENT via claude_bot to 5767743818 (200 ok). Note:
+  9109843678 is itself a bot id (USER_BOT_TO_BOT_DISABLED), not a chat.
