@@ -17,28 +17,28 @@ export function StressPanel({ getDesc, onApply }: {
   const [running, setRunning] = useState(false);
 
   const run = async () => {
-    setRunning(true); setStatus("추정 중... (fresh 회로 1회 실행)");
+    setRunning(true); setStatus("Estimating... (one fresh-circuit run)");
     setRes(null);
     const r = await postStress({ desc: getDesc(), temp_C: temp, hours, coefs });
     setRunning(false);
-    if (!r) { setStatus("데모 모드 (정적 페이지: 실시간 시뮬 불가)"); return; }
-    if (!r.ok) { setStatus("중단됨: " + (r.errors || []).join("; ")); return; }
+    if (!r) { setStatus("Static page: live sim unavailable."); return; }
+    if (!r.ok) { setStatus("Stopped: " + (r.errors || []).join("; ")); return; }
     setRes(r);
-    setStatus(`완료 job=${r.job} (fresh 파형 기반, 창 ${r.window_us?.join("~")}us)`);
+    setStatus(`Done job=${r.job} (fresh-waveform based, window ${r.window_us?.join("-")}us)`);
   };
 
   return (
     <div className="card">
-      <h3>열화 추정 (고온 장기 스트레스 → ΔVth/Ion/Ioff/SS)</h3>
+      <h3>Degradation estimate (hot long-term stress to dVth/ion/ioff/ss)</h3>
       <div className="row">
-        <div><label>온도 (°C)</label>
+        <div><label>Temp (C)</label>
           <input type="number" step={1} value={temp} onChange={(e) => setTemp(parseFloat(e.target.value))} /></div>
-        <div><label>시간 (h)</label>
+        <div><label>Time (h)</label>
           <input type="number" step={10} value={hours} onChange={(e) => setHours(parseFloat(e.target.value))} /></div>
-        <div><label>&nbsp;</label><button onClick={run} disabled={running}>스트레스 추정 실행</button></div>
+        <div><label>&nbsp;</label><button onClick={run} disabled={running}>Run stress estimate</button></div>
       </div>
       <details>
-        <summary>고급: BTS 법칙 계수 (합성 가정값)</summary>
+        <summary>Advanced: BTS-law coefficients (synthetic assumptions)</summary>
         <div className="row">
           {Object.keys(STRESS_COEFS).map((k) => (
             <div key={k}><label>{k}</label>
@@ -47,13 +47,13 @@ export function StressPanel({ getDesc, onApply }: {
           ))}
         </div>
       </details>
-      <p className="note">법칙: dVth=A·t^N·exp(Ea/k·(1/Tref−1/T))·bias.
-        fresh 회로 파형에서 TFT별 on-duty·구동전압·off바이어스를 시간가중 평균으로 측정.
-        드라이버는 시뮬 프레임 전체(스캔+홀드)가 실동작 1프레임이므로 별도 가중 없음. {res?.weight_note}</p>
+      <p className="note">Law: dVth=A t^N exp(Ea/k (1/Tref-1/T)) bias.
+        Per-TFT on-duty, drive voltage, and off-bias measured as time-weighted means from the fresh-circuit waveform.
+        A full simulated driver frame (scan+hold) equals one real frame, so no extra weighting. {res?.weight_note}</p>
       <span>{status}</span>
       {res?.table && (
         <div style={{ overflowX: "auto" }}><table><tbody>
-          <tr><th>TFT</th><th>duty_on</th><th>Von</th><th>Voff</th><th>ΔVth</th><th>Ion</th><th>Ioff</th><th>SS</th></tr>
+          <tr><th>TFT</th><th>duty_on</th><th>Von</th><th>Voff</th><th>dVth</th><th>ion</th><th>ioff</th><th>ss</th></tr>
           {res.table.map((r) => (
             <tr key={r.tft}><td>{r.tft}</td><td>{r.duty_on}</td><td>{r.von_V}</td>
               <td>{r.voff_V}</td><td>{r.dVth}</td><td>{r.ion}</td>
@@ -62,7 +62,7 @@ export function StressPanel({ getDesc, onApply }: {
         </tbody></table></div>
       )}
       {res?.table && (
-        <div><button className="primary" onClick={() => onApply(res.table!)}>TFT 표에 적용 (ΔVth는 ±2V로 클램프)</button>
+        <div><button className="primary" onClick={() => onApply(res.table!)}>Apply to TFT table (dVth clamped to +/-2V)</button>
           <p className="note">{res.law}</p></div>
       )}
     </div>
@@ -78,7 +78,7 @@ function MarginGrid({ m, which, nominal }: {
   m: MarginStatus; which: "degraded" | "fresh"; nominal: { VGH: number; VGL: number };
 }) {
   const grid = m.grids[which];
-  if (!grid.length) return <p className="note">계산 중...</p>;
+  if (!grid.length) return <p className="note">Computing...</p>;
   let bi = 0, bj = 0, bd = 1e9;
   m.vgh.forEach((g, i) => m.vgl.forEach((l, j) => {
     const d = Math.abs(g - nominal.VGH) + Math.abs(l - nominal.VGL);
@@ -87,9 +87,9 @@ function MarginGrid({ m, which, nominal }: {
   const isDriver = m.kind !== "pixel";
   return (
     <div style={{ overflowX: "auto" }}>
-      <p><b>{which === "degraded" ? "열화 회로" : "fresh 회로"}</b>
+      <p><b>{which === "degraded" ? "Aged circuit" : "Fresh circuit"}</b>
         {m.kind === "pixel" && m.ref_i_uA != null && (
-          <span className="note"> 기준 fresh@nominal {m.ref_i_uA.toFixed(4)}uA</span>)}</p>
+          <span className="note"> ref fresh@nominal {m.ref_i_uA.toFixed(4)}uA</span>)}</p>
       <table><tbody>
         <tr><th>VGH\VGL</th>{m.vgl.map((l) => (<th key={l}>{l}</th>))}</tr>
         {m.vgh.map((g, i) => (
@@ -126,21 +126,25 @@ export function MarginPanel({ getDesc, kind }: {
   useEffect(() => () => { if (timer.current) clearInterval(timer.current); }, []);
 
   const run = async () => {
-    const vgh = parseList(vghT), vgl = parseList(vglT);
-    if (vgh.length < 2 || vgl.length < 2) { setStatus("VGH/VGL 각 2개 이상 입력"); return; }
-    setM(null); setStatus("마진맵 시작...");
+    const vgh = parseList(vghT).slice(0, 5), vgl = parseList(vglT).slice(0, 5);
+    if (vgh.length < 2 || vgl.length < 2) { setStatus("Enter at least 2 values each for VGH/VGL"); return; }
+    if (vgh.length * vgl.length > 9) {
+      setStatus(`Public margin cap is 9 cells (now ${vgh.length}x${vgl.length}=${vgh.length * vgl.length}): shorten the lists (e.g. 3 VGH x 3 VGL)`);
+      return;
+    }
+    setM(null); setStatus("Starting margin map...");
     const s = await postMargin({ desc: getDesc(), vgh, vgl });
-    if (!s) { setStatus("데모 모드 (정적 페이지: 실시간 시뮬 불가)"); return; }
-    if (!s.ok) { setStatus("중단됨: " + (s.errors || []).join("; ")); return; }
-    setStatus(`진행 중... (총 ${s.total}셀)`);
+    if (!s) { setStatus("Static page: live sim unavailable."); return; }
+    if (!s.ok) { setStatus("Stopped: " + (s.errors || []).join("; ")); return; }
+    setStatus(`Running... (${s.total} cells total)`);
     if (timer.current) clearInterval(timer.current);
     timer.current = window.setInterval(async () => {
       const st = await getMargin(s.margin_job!);
-      if (!st) { setStatus("폴링 실패 (백엔드 확인)"); return; }
+      if (!st) { setStatus("Poll failed (check backend)"); return; }
       setM(st);
-      setStatus(st.state === "done" ? `완료 ${st.margin_job}` :
-        st.state === "error" ? `오류: ${st.error}` :
-        `진행 ${st.done}/${st.total}`);
+      setStatus(st.state === "done" ? `Done ${st.margin_job}` :
+        st.state === "error" ? `Error: ${st.error}` :
+        `Progress ${st.done}/${st.total}`);
       if (st.state !== "running" && timer.current) {
         clearInterval(timer.current); timer.current = null;
       }
@@ -152,16 +156,15 @@ export function MarginPanel({ getDesc, kind }: {
 
   return (
     <div className="card">
-      <h3>VGH × VGL 마진맵 ({kind === "driver" ? "판정 P/F" : "발광전류 변화율 %"})</h3>
+      <h3>VGH x VGL margin map ({kind === "driver" ? "verdict P/F" : "emission-current change %"})</h3>
       <div className="row">
-        <div><label>VGH 목록 (V)</label>
+        <div><label>VGH list (V)</label>
           <input style={{ width: 160 }} value={vghT} onChange={(e) => setVghT(e.target.value)} /></div>
-        <div><label>VGL 목록 (V)</label>
+        <div><label>VGL list (V)</label>
           <input style={{ width: 160 }} value={vglT} onChange={(e) => setVglT(e.target.value)} /></div>
-        <div><label>&nbsp;</label><button onClick={run}>마진맵 실행 (백그라운드)</button></div>
+        <div><label>&nbsp;</label><button onClick={run}>Run margin map (background)</button></div>
       </div>
-      <p className="note">열화(현재 TFT표+온도)와 fresh를 나란히 스윕. 검정 테두리 = 현재 설정과 가장 가까운 셀.
-        셀에 마우스를 올리면 job 번호. {kind === "pixel" ? "변화율 기준 = fresh@nominal 전류." : ""}</p>
+      <p className="note">Sweeps aged (current TFT table + temp) side by side with fresh. Black border = cell nearest your settings. Hover a cell for the job id. Public cap 9 cells (3x3). {kind === "pixel" ? "Change is vs fresh@nominal current." : ""}</p>
       <span>{status}</span>
       {m && m.done > 0 && (
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>

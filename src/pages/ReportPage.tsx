@@ -14,9 +14,9 @@ const OUT_ROWS = [
   ["OUT4","-9.496","8.703","pass"],["OUT5","-9.496","8.737","pass"],["OUT6","-9.499","8.762","pass"],
 ];
 const T2_ROWS = [
-  ["FLM (원안)","-2.867 / 9.057","3.487 / 3.725 (전달 실패)","fail","FAIL"],
-  ["VGH 상시온","6.821 / 8.509","7.953 / 8.018 (Low 없음)","fail","FAIL"],
-  ["B (채택)","-9.496 / 9.923","-9.499 / 8.762","pass","PASS"],
+  ["FLM (orig)","-2.867 / 9.057","3.487 / 3.725 (no transfer)","fail","FAIL"],
+  ["VGH always-on","6.821 / 8.509","7.953 / 8.018 (no low)","fail","FAIL"],
+  ["B (adopted)","-9.496 / 9.923","-9.499 / 8.762","pass","PASS"],
   ["Q","-9.496 / 9.942","-9.499 / 8.733","pass","PASS"],
 ];
 
@@ -72,21 +72,21 @@ export default function ReportPage() {
   }, [enabled]);
   return (
     <div>
-      <div className="card"><h2>GW 7T 새 회로 시뮬레이션 (All PMOS, 6단 2프레임, 250kHz)</h2>
-        <p className="note"><a href="#/drv">실험실(드라이버)로 가기</a> · <a href="#/pixel">픽셀 실험실로 가기</a></p></div>
-      <div className="card"><h2>회로도 (7T, C노드 없음, C1:A-B C2:Q-OUT)</h2><Schem7T /></div>
-      <div className="card"><h2>OUT 요약 (6단)</h2>
+      <div className="card"><h2>GW 7T new circuit simulation (all PMOS, 6 stages, 2 frames, 250kHz)</h2>
+        <p className="note">Synthetic-model ngspice evidence, not measured silicon. <a href="#/drv">Driver lab</a> · <a href="#/pixel">Pixel lab</a></p></div>
+      <div className="card"><h2>Schematic (7T, no C node, C1:A-B C2:Q-OUT)</h2><Schem7T /></div>
+      <div className="card"><h2>OUT summary (6 stages)</h2>
         <table><tbody>
-          <tr><th>OUT</th><th>min (V)</th><th>max (V)</th><th>판정</th></tr>
+          <tr><th>OUT</th><th>min (V)</th><th>max (V)</th><th>Verdict</th></tr>
           {OUT_ROWS.map((r) => (<tr key={r[0]}><td>{r[0]}</td><td>{r[1]}</td><td>{r[2]}</td><td className="pass">{r[3]}</td></tr>))}
         </tbody></table></div>
-      <div className="card"><h2>T2 게이트 비교 (원안 vs 개조)</h2>
+      <div className="card"><h2>T2 gate comparison (original vs rework)</h2>
         <table><tbody>
-          <tr><th>T2.G</th><th>OUT1</th><th>OUT6</th><th>마진</th></tr>
+          <tr><th>T2.G</th><th>OUT1</th><th>OUT6</th><th>Margin</th></tr>
           {T2_ROWS.map((r) => (<tr key={r[0]}><td>{r[0]}</td><td>{r[1]}</td><td>{r[2]}</td><td className={r[3]}>{r[4]}</td></tr>))}
         </tbody></table>
-        <p className="note">원인: T2.G=FLM은 첫 프레임 스캔 펄스 때만 A를 당겨. 스캔 끝나면 A가 플로팅이라 후단으로 갈수록 B-QB 체인이 무너져. B나 Q로 물리면 스테이지 출력이 A 충전을 계속 끌고 가서 6단까지 살아.</p></div>
-      <div className="card"><h2>파형 (T0-1H ~ T0+8H, H=4.0us)</h2><canvas id="plot" ref={ref}></canvas></div>
+        <p className="note">Cause: T2.G=FLM pulls A only during the first-frame scan pulse. After scan, A floats and the B-QB chain collapses downstream. Tying to B or Q keeps stage output driving A charge through all 6 stages.</p></div>
+      <div className="card"><h2>Waveforms (T0-1H to T0+8H, H=4.0us)</h2><canvas id="plot" ref={ref}></canvas></div>
     </div>
   );
 }

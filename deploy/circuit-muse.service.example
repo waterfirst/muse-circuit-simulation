@@ -1,0 +1,23 @@
+[Unit]
+Description=Circuit Muse ngspice simulation backend
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/USER/muse-circuit-simulation/server
+ExecStart=/usr/bin/python3 /home/USER/muse-circuit-simulation/server/app.py
+Environment=BIND_HOST=100.69.9.76
+Environment=PATH=/home/USER/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=OMP_THREAD_LIMIT=1
+Environment=SIM_TIMEOUT_S=320
+Environment=PUBLIC_MAX_CELLS=9
+Environment=RUNS_KEEP=200
+Environment=RUNS_MAX_AGE_S=604800
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

@@ -252,7 +252,7 @@ LANES.forEach(([k, lab]) => {
   chipBox.appendChild(b);
 });
 
-const BACKENDS = ["https://murray-voice-julie-attitude.trycloudflare.com", "http://100.69.9.76:8766", "http://192.168.45.248:8766", "http://127.0.0.1:8766"];
+const BACKENDS = ["http://127.0.0.1:8766"];
 async function tryBackend(desc) {
   for (const b of BACKENDS) {
     try {

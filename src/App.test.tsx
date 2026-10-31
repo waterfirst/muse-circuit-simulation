@@ -2,6 +2,9 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import App from "./App";
+import { LangProvider } from "./lib/i18n";
+
+const ui = () => <LangProvider><App /></LangProvider>;
 
 afterEach(() => {
   cleanup();
@@ -11,10 +14,10 @@ afterEach(() => {
 
 describe("report page (default)", () => {
   it("shows the GW 7T analysis report first", () => {
-    render(<App />);
-    expect(screen.getByText("GW 7T 새 회로 시뮬레이션 (All PMOS, 6단 2프레임, 250kHz)")).toBeDefined();
-    expect(screen.getByText("OUT 요약 (6단)")).toBeDefined();
-    expect(screen.getByText("T2 게이트 비교 (원안 vs 개조)")).toBeDefined();
+    render(ui());
+    expect(screen.getByText("GW 7T new circuit simulation (all PMOS, 6 stages, 2 frames, 250kHz)")).toBeDefined();
+    expect(screen.getByText("OUT summary (6 stages)")).toBeDefined();
+    expect(screen.getByText("T2 gate comparison (original vs rework)")).toBeDefined();
     expect(document.getElementById("plot")).toBeDefined();
     expect(document.querySelectorAll("svg.schem")).toHaveLength(1);
   });
@@ -22,8 +25,8 @@ describe("report page (default)", () => {
 describe("lab page", () => {
   it("renders header, table, schematic and plot", () => {
     window.location.hash = "#/drv";
-    render(<App />);
-    expect(screen.getByText("드라이버 Lab — GW / EM / GC / GI")).toBeDefined();
+    render(ui());
+    expect(screen.getByText("Driver lab — GW / EM / GC / GI")).toBeDefined();
     expect(document.getElementById("tfttab")).toBeDefined();
     expect(document.getElementById("schem")).toBeDefined();
     expect(document.getElementById("plot")).toBeDefined();
@@ -32,21 +35,21 @@ describe("lab page", () => {
   });
   it("loads the VC preset by default", () => {
     window.location.hash = "#/drv";
-    render(<App />);
+    render(ui());
     const info = document.getElementById("scheminfo")?.textContent ?? "";
     expect(info).toContain("T1(CLK1/FLM/B)");
     expect(info).toContain("T2(C/VGH/A)");
   });
   it("broken preset flips T2.D to C", () => {
     window.location.hash = "#/drv";
-    render(<App />);
-    fireEvent.click(screen.getByText("고장 예시 (A 플로팅)"));
+    render(ui());
+    fireEvent.click(screen.getByText("Broken example (A floating)"));
     const info = document.getElementById("scheminfo")?.textContent ?? "";
     expect(info).toContain("T2(C/VGH/C)");
   });
   it("table edit syncs to the schematic info", () => {
     window.location.hash = "#/drv";
-    render(<App />);
+    render(ui());
     const selects = document.querySelectorAll("#tfttab select");
     fireEvent.change(selects[0], { target: { value: "VGL" } });
     const info = document.getElementById("scheminfo")?.textContent ?? "";
@@ -54,7 +57,7 @@ describe("lab page", () => {
   });
   it("unchecking a TFT drops it from the info", () => {
     window.location.hash = "#/drv";
-    render(<App />);
+    render(ui());
     const boxes = document.querySelectorAll('#tfttab input[type="checkbox"]');
     fireEvent.click(boxes[8]);
     const info = document.getElementById("scheminfo")?.textContent ?? "";
@@ -62,7 +65,7 @@ describe("lab page", () => {
   });
   it("lane chips toggle", () => {
     window.location.hash = "#/drv";
-    render(<App />);
+    render(ui());
     const chip = screen.getByText("OUT6", { selector: "#lanes .chip" });
     expect(chip.className).toContain("on");
     fireEvent.click(chip);
@@ -71,19 +74,19 @@ describe("lab page", () => {
   it("failed backends fall back to the demo series", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("down")));
     window.location.hash = "#/drv";
-    render(<App />);
+    render(ui());
     await act(async () => {
-      fireEvent.click(screen.getByText("시뮬레이션 실행"));
+      fireEvent.click(screen.getByText("Run simulation"));
     });
-    expect(document.getElementById("status")?.textContent).toContain("데모 파형입니다");
-    expect(document.getElementById("summary")?.textContent).toContain("vC 검증 파형");
+    expect(document.getElementById("status")?.textContent).toContain("Demo waveform");
+    expect(document.getElementById("summary")?.textContent).toContain("stored verification waveform");
   });
 });
 
 describe("schematic", () => {
   it("renders 9 FET glyphs with net-colored pins", () => {
     window.location.hash = "#/drv";
-    render(<App />);
+    render(ui());
     expect(document.querySelectorAll("#schem .tftnode")).toHaveLength(9);
     // 9 TFT labels + 2 cap labels
     expect(document.querySelectorAll("#schem .tftlbl")).toHaveLength(11);
@@ -95,7 +98,7 @@ describe("schematic", () => {
   });
   it("net picker chips carry color edges", () => {
     window.location.hash = "#/drv";
-    render(<App />);
+    render(ui());
     const chips = document.querySelectorAll("#netpick .chip");
     expect(chips).toHaveLength(20);
     expect((chips[0] as HTMLElement).style.borderLeft).toContain("6px solid");
@@ -105,19 +108,19 @@ describe("schematic", () => {
 describe("report page", () => {
   it("renders on #/gw7t with tables and canvas", () => {
     window.location.hash = "#/gw7t";
-    render(<App />);
-    expect(screen.getByText("OUT 요약 (6단)")).toBeDefined();
-    expect(screen.getByText("T2 게이트 비교 (원안 vs 개조)")).toBeDefined();
+    render(ui());
+    expect(screen.getByText("OUT summary (6 stages)")).toBeDefined();
+    expect(screen.getByText("T2 gate comparison (original vs rework)")).toBeDefined();
     expect(document.getElementById("plot")).toBeDefined();
     expect(document.querySelectorAll("svg.schem")).toHaveLength(1);
   });
   it("lab links to the report", () => {
     window.location.hash = "#/drv";
-    render(<App />);
-    expect(screen.getByText("GW 7T 리포트").getAttribute("href")).toBe("#/");
+    render(ui());
+    expect(screen.getByText("GW 7T report").getAttribute("href")).toBe("#/");
   });
   it("tabs switch to the pixel page", () => {
-    render(<App />);
-    expect(screen.getByText("픽셀 (8T1C)").getAttribute("href")).toBe("#/pixel");
+    render(ui());
+    expect(screen.getByText("Pixel (8T1C)").getAttribute("href")).toBe("#/pixel");
   });
 });

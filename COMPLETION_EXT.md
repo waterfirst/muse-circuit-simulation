@@ -1,6 +1,6 @@
 [GW React 확장] 빌드 프로세스 종료.
 --- log tail:
-muse: workspace root: /home/waterfirst/meta_muse/gw-react (cwd default)
+muse: workspace root: ~/muse-circuit-simulation (cwd default)
 muse: Agent delegation: auto unavailable: workspace is untrusted.
 Done. GW/EM/GC/GI all PASS fresh (jobs `20261029_001949_77826c`, `...001946_15127b`, `...001947_435635`, `...001948_eb6ddc`); pixel runs.
 No published circuit failed as published — EM 12T3C passed first run, no retune. (Prior session's pixel bias fix is in BUILD_LOG.)
