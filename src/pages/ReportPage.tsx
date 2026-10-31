@@ -73,7 +73,7 @@ export default function ReportPage() {
   return (
     <div>
       <div className="card"><h2>GW 7T 새 회로 시뮬레이션 (All PMOS, 6단 2프레임, 250kHz)</h2>
-        <p className="note"><a href="#/">실험실로 돌아가기</a></p></div>
+        <p className="note"><a href="#/drv">실험실(드라이버)로 가기</a> · <a href="#/pixel">픽셀 실험실로 가기</a></p></div>
       <div className="card"><h2>회로도 (7T, C노드 없음, C1:A-B C2:Q-OUT)</h2><Schem7T /></div>
       <div className="card"><h2>OUT 요약 (6단)</h2>
         <table><tbody>

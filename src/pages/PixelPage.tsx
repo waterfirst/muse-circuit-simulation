@@ -49,8 +49,8 @@ export default function PixelPage() {
     const j = await postPixel(buildDesc(data, t1dv));
     setRunning(false);
     if (!j) {
-      setStatus("서버에 닿지 않음 (127.0.0.1:8768 확인)");
-      setErrs(["백엔드 연결 실패"]); return null;
+      setStatus("데모 모드 (정적 페이지: 실시간 시뮬 불가)");
+      setErrs(["정적 페이지에서는 백엔드 연결 없이 저장된 파형만 봅니다"]); return null;
     }
     if (!j.ok) {
       setStatus("중단됨 (위 오류 확인)");

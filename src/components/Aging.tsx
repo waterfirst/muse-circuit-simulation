@@ -21,7 +21,7 @@ export function StressPanel({ getDesc, onApply }: {
     setRes(null);
     const r = await postStress({ desc: getDesc(), temp_C: temp, hours, coefs });
     setRunning(false);
-    if (!r) { setStatus("서버에 닿지 않음 (127.0.0.1:8768 확인)"); return; }
+    if (!r) { setStatus("데모 모드 (정적 페이지: 실시간 시뮬 불가)"); return; }
     if (!r.ok) { setStatus("중단됨: " + (r.errors || []).join("; ")); return; }
     setRes(r);
     setStatus(`완료 job=${r.job} (fresh 파형 기반, 창 ${r.window_us?.join("~")}us)`);
@@ -130,7 +130,7 @@ export function MarginPanel({ getDesc, kind }: {
     if (vgh.length < 2 || vgl.length < 2) { setStatus("VGH/VGL 각 2개 이상 입력"); return; }
     setM(null); setStatus("마진맵 시작...");
     const s = await postMargin({ desc: getDesc(), vgh, vgl });
-    if (!s) { setStatus("서버에 닿지 않음 (127.0.0.1:8768 확인)"); return; }
+    if (!s) { setStatus("데모 모드 (정적 페이지: 실시간 시뮬 불가)"); return; }
     if (!s.ok) { setStatus("중단됨: " + (s.errors || []).join("; ")); return; }
     setStatus(`진행 중... (총 ${s.total}셀)`);
     if (timer.current) clearInterval(timer.current);

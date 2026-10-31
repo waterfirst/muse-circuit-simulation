@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // served under https://waterfirst.pro/circuit-muse/ (/circuit/ is taken)
-  base: "/circuit-muse/",
+  // relative base: works on both waterfirst.pro/circuit-muse/ and
+  // waterfirst.github.io/muse-circuit-simulation/ (GitHub Pages)
+  base: "./",
 })

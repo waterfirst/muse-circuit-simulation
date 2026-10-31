@@ -65,8 +65,8 @@ export default function LabPage() {
     const j = await tryBackend(desc);
     setRunning(false);
     if (!j) {
-      setStatus("서버에 닿지 않아 저장된 검증 파형을 보여줍니다 (실시간 시뮬 아님)");
-      setWarns(["127.0.0.1:8768 백엔드가 꺼져 있으면 데모만 표시됩니다. `python3 server/app.py`로 켜세요."]);
+      setStatus("데모 파형입니다 (정적 페이지에서는 실시간 시뮬이 안 됩니다)");
+      setWarns(["이 페이지는 실시간 시뮬 없이 저장된 검증 파형을 보여줍니다. 로컬에서 직접 돌리려면 `python3 server/app.py`로 백엔드를 켜세요."]);
       setSummary(DEMO_SUMMARY);
       setSeries(DEMO_SERIES); setInfo(DEMO_INFO); setMargin(null);
       return;
