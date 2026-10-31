@@ -41,7 +41,7 @@ sup { font-size: 11px; }
 .chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; -webkit-overflow-scrolling: touch; }
 .chip { flex: 0 0 auto; font-size: 13px; border: 1px solid var(--bd); border-radius: 16px; padding: 6px 10px; background: #fff; }
 .chip.on { background: #111; color: #fff; border-color: #111; }
-svg.schem { width: 100%; height: auto; background: #fff; border: 1px solid #ccc; border-radius: 6px; }
+svg.schem { width: 100%; max-width: 620px; height: auto; display: block; margin: 0 auto; background: #fff; border: 1px solid #ccc; border-radius: 6px; }
 .tft { fill: #fff; stroke: #111; stroke-width: 1.6; }
 .pass { color: #060; font-weight: bold; } .fail { color: #c00; font-weight: bold; }
 .tabs { display: flex; gap: 4px; max-width: 1100px; margin: 0 auto; padding: 4px 0; flex-wrap: wrap; }
