@@ -4,6 +4,7 @@ import { BROKEN, DEFAULT_PARAMS, NETS, PRESETS, PRESET_POLARITY, PRESET_WIDTH_H,
   type CapConn, type Net, type Params, type PassFail, type Pin, type PresetName,
   type Series, type SeriesInfo, type TName, type TftMap } from "../lib/circuit";
 import { tryBackend } from "../lib/api";
+import { t, useLang } from "../lib/i18n";
 import ParamForm from "../components/ParamForm";
 import TftTable from "../components/TftTable";
 import { MarginPanel, StressPanel } from "../components/Aging";
@@ -15,9 +16,10 @@ import demo from "../data/demo.json";
 
 const DEMO_SERIES = demo.series as Series;
 const DEMO_INFO = demo.info as SeriesInfo;
-const DEMO_SUMMARY = "vC 검증 파형: OUT1 min -9.499 max 9.169, 6단 2프레임, H=4.0us (250kHz)";
+const DEMO_SUMMARY = "stored verification waveform: OUT1 min -9.499 max 9.169, 6 stages, 2 frames, H=4.0us (250kHz)";
 
 export default function LabPage() {
+  const { lang } = useLang();
   const [preset, setPreset] = useState<PresetName>("GW");
   const [params, setParams] = useState<Params>(DEFAULT_PARAMS);
   const [tft, setTft] = useState<TftMap>(() => presetTft("GW"));
@@ -26,7 +28,7 @@ export default function LabPage() {
   const [lanes, setLanes] = useState<[string, string][]>(() => driverLanes(6, ["a","b","c","q","qb"]));
   const [enabled, setEnabled] = useState<Record<string, boolean>>(
     () => Object.fromEntries(driverLanes(6, ["a","b","c","q","qb"]).map(([, lab]) => [lab, true])));
-  const [status, setStatus] = useState("저장된 검증 파형을 보여줍니다 (실행 전)");
+  const [status, setStatus] = useState("");
   const [errs, setErrs] = useState<string[]>([]);
   const [warns, setWarns] = useState<string[]>([]);
   const [sugs, setSugs] = useState<string[]>([]);
@@ -60,20 +62,20 @@ export default function LabPage() {
   const run = async () => {
     const desc = buildDesc(params, tft, preset, caps);
     setRunning(true);
-    setStatus("실행 중... (ngspice)");
+    setStatus(t(lang, "running"));
     setErrs([]); setWarns([]); setSugs([]); setSummary(""); setPassfail(null); setCir("");
     const j = await tryBackend(desc);
     setRunning(false);
     if (!j) {
-      setStatus("데모 파형입니다 (정적 페이지에서는 실시간 시뮬이 안 됩니다)");
-      setWarns(["이 페이지는 실시간 시뮬 없이 저장된 검증 파형을 보여줍니다. 로컬에서 직접 돌리려면 `python3 server/app.py`로 백엔드를 켜세요."]);
+      setStatus(t(lang, "demo_note"));
+      setWarns(["Static page: showing the stored verification waveform without live sim. To run locally, start the backend with `python3 server/app.py`."]);
       setSummary(DEMO_SUMMARY);
       setSeries(DEMO_SERIES); setInfo(DEMO_INFO); setMargin(null);
       return;
     }
     setErrs(j.errors || []); setWarns(j.warnings || []); setSugs(j.suggestions || []);
-    if (!j.ok) { setStatus("중단됨 (위 오류 확인)"); return; }
-    setStatus(`실제 시뮬 완료 job=${j.job} H=${j.timing?.H_us}us`);
+    if (!j.ok) { setStatus(t(lang, "stopped")); return; }
+    setStatus(`done job=${j.job} H=${(j.timing as { H_us?: number })?.H_us}us`);
     setSummary(JSON.stringify({ summary: j.summary, timing: j.timing, rails: j.rails }, null, 1));
     setMargin(params.polarity === "low_pulse" ? -6.0 : null);
     setPassfail(j.passfail || null);
@@ -98,60 +100,57 @@ export default function LabPage() {
 
   return (
     <div className="wrap">
-      <h1>드라이버 Lab — GW / EM / GC / GI</h1>
-      <p className="note">프리셋을 고르고 실행하면 서버에서 검증 후 ngspice로 시뮬레이션합니다.
-        W/L·캐패시터는 합성 가정값입니다. FLM은 EM/GC/GI에서 스타트(STV) 신호입니다.</p>
+      <h1>Driver lab — GW / EM / GC / GI</h1>
+      <p className="note">Pick a preset and run: the server validates, then ngspice simulates. W/L and caps are synthetic assumptions. FLM is the start (STV) signal on EM/GC/GI.</p>
       <div className="card">
-        <h3>0. 프리셋</h3>
+        <h3>0. Preset</h3>
         <div className="chips">
           {PRESETS.map((p) => (
             <button key={p} className={"chip" + (preset === p ? " on" : "")}
               onClick={() => loadPreset(p)}>{p}</button>
           ))}
           <button className="chip" onClick={() => { setPreset("GW"); setTft(presetToMap(BROKEN)); }}>
-            고장 예시 (A 플로팅)</button>
+            Broken example (A floating)</button>
         </div>
-        <p className="note">EM: Samsung US 11,205,374 B2 Fig.4 12T3C. GC/GI: 동일 스테이지 재사용(가정, 폭 2H).
-          세부 근거는 아래 1번 표와 docs/CIRCUITS.md.</p>
+        <p className="note">EM: Samsung US 11,205,374 B2 Fig.4 12T3C. GC/GI reuse the same stage (assumption, width 2H). See the source table below and docs/CIRCUITS.md.</p>
       </div>
       <SourceTrace preset={preset} />
       <ParamForm params={params} onChange={setParams} />
       <div className="card">
-        <h3>2.5 회로도 (TFT를 누르면 순환 선택, 핀 직접 연결) — P는 게이트 버블</h3>
+        <h3>2.5 Schematic (click a TFT to cycle, direct pin wiring) — P has a gate bubble</h3>
         <SchemEditor tft={tft} caps={caps} pickedNet={pickedNet} onPickNet={setPickedNet} onPinClick={onPinClick} />
         <p className="note" id="scheminfo">{schemInfoText(tft)}</p>
         <NetPicker picked={pickedNet} onPick={setPickedNet} />
       </div>
       <div className="card">
-        <h3>2. TFT 연결 (G / S / D / W / L / P·N)</h3>
+        <h3>2. TFT wiring (G / S / D / W / L / P-N)</h3>
         <TftTable tft={tft}
           onChange={(t, pin, net) => setPin(t, pin, net)}
           onToggle={(t, on) => toggleTft(t, on)}
           onSize={(t, k, v) => setTft((p) => ({ ...p, [t]: { ...p[t], [k]: v } }))}
           onType={(t, ty) => setTft((p) => ({ ...p, [t]: { ...p[t], type: ty } }))}
           onDeg={(t, k, v) => setTft((p) => ({ ...p, [t]: { ...p[t], [k]: v } }))} />
-        <p className="note">허용 넷: VGH VGL FLM CLK1 CLK2 A B C Q QB OUT IN N1~N8. T1~T12.
-          ΔVth/Ion/Ioff/SS는 fresh(0/1/1/1)와 다르면 노란색. 온도는 1번 패널.</p>
+        <p className="note">Allowed nets: VGH VGL FLM CLK1 CLK2 A B C Q QB OUT IN N1-N8. T1-T12. dVth/ion/ioff/ss highlight yellow when off fresh (0/1/1/1). Temperature is in panel 1.</p>
       </div>
       <CapsEditor caps={caps}
         onChange={(i, c) => setCaps((p) => p.map((x, j) => (j === i ? c : x)))}
         onAdd={() => setCaps((p) => [...p, { a: "VGH", b: "QB", pf: 0.5, name: `C${p.length + 1}`, on: true }])}
         onRemove={(i) => setCaps((p) => p.filter((_, j) => j !== i))} />
       <div className="card">
-        <h3>3. 실행</h3>
-        <button id="run" className="primary" onClick={run} disabled={running}>시뮬레이션 실행</button>
+        <h3>3. Run</h3>
+        <button id="run" className="primary" onClick={run} disabled={running}>{running ? t(lang, "running") : t(lang, "run")}</button>
         <span id="status"> {status}</span>
-        <div id="errs" className="msg">{errs.length > 0 && (<span>오류:<br />{errs.map((e, i) => (<span key={i}>- {e}<br /></span>))}</span>)}</div>
-        <div id="warns" className="msg">{warns.length > 0 && (<span>경고:<br />{warns.map((e, i) => (<span key={i}>! {e}<br /></span>))}</span>)}</div>
-        <div id="sugs" className="msg">{sugs.length > 0 && (<span>수정 제안:<br />{sugs.map((e, i) => (<span key={i}>&gt; {e}<br /></span>))}</span>)}</div>
+        <div id="errs" className="msg">{errs.length > 0 && (<span>{t(lang, "errors")}<br />{errs.map((e, i) => (<span key={i}>- {e}<br /></span>))}</span>)}</div>
+        <div id="warns" className="msg">{warns.length > 0 && (<span>Warnings:<br />{warns.map((e, i) => (<span key={i}>! {e}<br /></span>))}</span>)}</div>
+        <div id="sugs" className="msg">{sugs.length > 0 && (<span>Suggestions:<br />{sugs.map((e, i) => (<span key={i}>&gt; {e}<br /></span>))}</span>)}</div>
         <pre id="summary">{summary}</pre>
       </div>
       {passfail && (
         <div className="card">
-          <h3>3b. 스테이지/프레임 판정: {passfail.pass
+          <h3>3b. Stage/frame verdict: {passfail.pass
             ? <span className="pass">PASS</span> : <span className="fail">FAIL</span>}</h3>
           <table><tbody>
-            <tr><th>스테이지</th><th>판정</th><th>펄스수</th><th>폭(H)</th><th>극값(V)</th></tr>
+            <tr><th>Stage</th><th>Verdict</th><th>Pulses</th><th>Width (H)</th><th>Extreme (V)</th></tr>
             {Object.entries(passfail.stages).map(([k, s]) => (
               <tr key={k}><td>{k}</td>
                 <td className={s.pass ? "pass" : "fail"}>{s.pass ? "PASS" : "FAIL"}</td>
@@ -159,9 +158,7 @@ export default function LabPage() {
             ))}
           </tbody></table>
           <div className="msg">{passfail.reasons.map((r, i) => (<div key={i}>- {r}</div>))}</div>
-          <p className="note">기준: 프레임당 정확히 1개 활성 펄스, 단 순서대로.
-            low_pulse: low ≤ −6V, 휴지 ≥ VGH−1.5V. high_pulse: high ≥ VGH−1.5V,
-            휴지 ≤ rest spec, 출력폭 = 스타트폭 ±1.5H.</p>
+          <p className="note">Rule: exactly one active pulse per frame, in stage order. low_pulse: low dips to -6V or below, idle at VGH-1.5V or above. high_pulse: high at VGH-1.5V or above, idle within rest spec, output width = start width +/-1.5H.</p>
         </div>
       )}
       <StressPanel
@@ -184,9 +181,9 @@ export default function LabPage() {
         marginReqLow={margin} />
       {cir && (
         <div className="card">
-          <h3>5. 넷리스트</h3>
-          <button onClick={downloadCir}>.cir 다운로드</button>
-          <span className="note"> job={job} · 서버에도 server/runs/{job}/job.cir 로 저장됨</span>
+          <h3>5. Netlist</h3>
+          <button onClick={downloadCir}>Download .cir</button>
+          <span className="note"> job={job} · also saved on the server at server/runs/{job}/job.cir</span>
           <pre>{cir}</pre>
         </div>
       )}

@@ -1,9 +1,0 @@
-{
- "kind": "driver",
- "preset": "GW",
- "VGH": 8.0,
- "VGL": -9.5,
- "freq_kHz": 250,
- "stages": 4,
- "frames": 2
-}

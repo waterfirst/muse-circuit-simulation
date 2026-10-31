@@ -216,14 +216,18 @@ def run_stress(payload):
 # ================= MARGIN MAP =================
 MARGIN_JOBS = {}
 _MJ_LOCK = threading.Lock()
+# Internal research cap. Public entry points pass a lower max_cells
+# (app.py PUBLIC_MAX_CELLS) so one request cannot queue ~100 sims.
 MAX_CELLS = 49
+PUBLIC_MARGIN_CELLS = 9  # 3x3 max for unauthenticated/public use
 
 
 def _strip_for_fresh(desc):
     return _fresh_desc(desc)
 
 
-def start_margin(payload):
+def start_margin(payload, max_cells=None):
+    cap = MAX_CELLS if max_cells is None else max_cells
     if not isinstance(payload, dict) or "desc" not in payload:
         return {"ok": False, "errors": ["need {desc, vgh:[...], vgl:[...]}"]}
     desc = payload["desc"]
@@ -244,8 +248,9 @@ def start_margin(payload):
         lists[k] = fs
     if errs:
         return {"ok": False, "errors": errs}
-    if len(lists["vgh"]) * len(lists["vgl"]) > MAX_CELLS:
-        return {"ok": False, "errors": [f"grid too big (max {MAX_CELLS} cells)"]}
+    if len(lists["vgh"]) * len(lists["vgl"]) > cap:
+        return {"ok": False,
+                "errors": [f"grid too big (max {cap} cells)"]}
     is_pixel = isinstance(desc, dict) and desc.get("kind") == "pixel"
     verr = (backend.validate_pixel(desc)[0] if is_pixel
             else backend.validate_driver(desc or {})[0])
