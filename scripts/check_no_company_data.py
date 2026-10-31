@@ -18,7 +18,7 @@ PATTERNS = [
     (r"100\.\d+\.\d+\.\d+", "tailnet/private IP"),
     (r"192\.168\.\d+\.\d+", "private IP"),
     (r"10\.\d+\.\d+\.\d+", "private IP"),
-    (r"(?i)(api[_-]?key|api[_-]?secret|hf[_-]?token|openai[_-]?key)\s*[:=]\s*\S+", "possible secret"),
+    (r"(?i)(api[_-]?key|api[_-]?secret|hf[_-]?token|provider[_-]?key)\s*[:=]\s*\S+", "possible secret"),
     (r"sk-[A-Za-z0-9]{8,}", "possible secret key"),
     (r"xox[bap]-", "possible slack token"),
     (r"AKIA[0-9A-Z]{16}", "possible AWS key"),

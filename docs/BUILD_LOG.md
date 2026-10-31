@@ -85,7 +85,7 @@
   so urllib sent loopback 127.0.0.1:8769 traffic to a sandbox proxy, which
   answered `upstream connection failed: Connection refused (os error 111)`.
   Re-ran with proxy vars unset → **21/21 PASS** (19s). No code change.
-  Note for Codex setup: run tests with `no_proxy` covering localhost or
+  Note for local setup: run tests with `no_proxy` covering localhost or
   with `*_proxy` unset, otherwise `test_http` fails the same way.
 
 ## 2026-10-29 00:40 KST — operator 5-item audit (independent)
@@ -126,7 +126,7 @@
   BIND_HOST=$(tailscale ip -4) (expect <TAILNET-IP>), (2) scp
   /tmp/c2root/circuit2/* to old ~/web/circuit2/, (3) nginx block + sudo
   reload per docs/DEPLOY_CIRCUIT2.md.
-- Telegram report SENT via claude_bot to 5767743818 (200 ok). Note:
+- Telegram report sent successfully (200 ok). Note:
   9109843678 is itself a bot id (USER_BOT_TO_BOT_DISABLED), not a chat.
 
 ## 2026-10-29 — hackathon: source-trace UI + video plan

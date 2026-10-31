@@ -62,6 +62,6 @@ min 1.2s per card. Export matching .srt for the submission form.
 
 ## Out of scope for this video
 
-GC/GI reuse story, Claude comparison, pixel aging detail — appendix material only.
+GC/GI reuse story and pixel-aging detail — appendix material only.
 If asked in Q&A: "GC/GI reuse the EM stage, disclosed as an assumption; pixel
 currents are illustrative from a synthetic OLED card."
