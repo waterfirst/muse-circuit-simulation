@@ -19,6 +19,6 @@ describe("SourceTrace", () => {
   it("honestly reports no trace for GW", () => {
     render(<SourceTrace preset="GW" />);
     expect(document.getElementById("tracetab")).toBeNull();
-    expect(screen.getByText(/특허 문장 단위 근거 추적을 제공하지 않습니다/)).toBeDefined();
+    expect(screen.getByText(/does not provide patent-sentence-level traceability/)).toBeDefined();
   });
 });

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { LANES, plotWindow, type Series, type SeriesInfo } from "../lib/circuit";
 import { drawPlot } from "../lib/plot";
+import { useLang } from "../lib/i18n";
 
 interface Props {
   series: Series | null;
@@ -13,7 +14,9 @@ interface Props {
 }
 
 export default function WavePlot({ series, info, enabled, onToggleLane,
-  marginReqLow = null, lanes = LANES, title = "파형 (프레임1 확대, 세로 분리)" }: Props) {
+  marginReqLow = null, lanes = LANES, title }: Props) {
+  const { lang } = useLang();
+  const plotTitle = title || (lang === "en" ? "Waveforms (frame 1 zoom, separated lanes)" : "파형 (프레임1 확대, 세로 분리)");
   const ref = useRef<HTMLCanvasElement>(null);
   const [zoom, setZoom] = useState(0); // 0 default, + zoom in, - zoom out
   const [shift, setShift] = useState(0); // pan steps
@@ -49,7 +52,7 @@ export default function WavePlot({ series, info, enabled, onToggleLane,
   });
   return (
     <div className="card">
-      <h3>{title}</h3>
+      <h3>{plotTitle}</h3>
       <div className="chips" id="lanes">
         {lanes.map(([, lab]) => (
           <button key={lab} className={"chip" + (enabled[lab] ? " on" : "")}
@@ -57,14 +60,14 @@ export default function WavePlot({ series, info, enabled, onToggleLane,
         ))}
       </div>
       <div className="chips">
-        <button className="chip" onClick={() => setZoom((z) => z + 1)}>+ 확대</button>
-        <button className="chip" onClick={() => setZoom((z) => z - 1)}>− 축소</button>
-        <button className="chip" onClick={() => setShift((s) => s - 1)}>◀ 이전</button>
-        <button className="chip" onClick={() => setShift((s) => s + 1)}>이후 ▶</button>
-        <button className="chip" onClick={() => { setZoom(0); setShift(0); }}>리셋</button>
+        <button className="chip" onClick={() => setZoom((z) => z + 1)}>+ {lang === "en" ? "Zoom in" : "확대"}</button>
+        <button className="chip" onClick={() => setZoom((z) => z - 1)}>− {lang === "en" ? "Zoom out" : "축소"}</button>
+        <button className="chip" onClick={() => setShift((s) => s - 1)}>◀ {lang === "en" ? "Earlier" : "이전"}</button>
+        <button className="chip" onClick={() => setShift((s) => s + 1)}>{lang === "en" ? "Later" : "이후"} ▶</button>
+        <button className="chip" onClick={() => { setZoom(0); setShift(0); }}>{lang === "en" ? "Reset" : "리셋"}</button>
       </div>
       <canvas id="plot" className="plot" ref={ref}></canvas>
-      <p className="note">신호 칩으로 표시 선택, 확대/축소/이전/이후로 시간창 이동. 전 레인 공유 시간축.</p>
+      <p className="note">{lang === "en" ? "Select signals with the chips. Zoom or pan the shared time axis for all lanes." : "신호 칩으로 표시 선택, 확대/축소/이전/이후로 시간창 이동. 전 레인 공유 시간축."}</p>
     </div>
   );
 }

@@ -12,14 +12,12 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("report page (default)", () => {
-  it("shows the GW 7T analysis report first", () => {
+describe("default page", () => {
+  it("shows Driver Lab first", () => {
     render(ui());
-    expect(screen.getByText("GW 7T new circuit simulation (all PMOS, 6 stages, 2 frames, 250kHz)")).toBeDefined();
-    expect(screen.getByText("OUT summary (6 stages)")).toBeDefined();
-    expect(screen.getByText("T2 gate comparison (original vs rework)")).toBeDefined();
+    expect(screen.getByText("Driver lab — GW / EM / GC / GI")).toBeDefined();
     expect(document.getElementById("plot")).toBeDefined();
-    expect(document.querySelectorAll("svg.schem")).toHaveLength(1);
+    expect(document.getElementById("schem")).toBeDefined();
   });
 });
 describe("lab page", () => {
@@ -105,19 +103,12 @@ describe("schematic", () => {
   });
 });
 
-describe("report page", () => {
-  it("renders on #/gw7t with tables and canvas", () => {
+describe("tab routing", () => {
+  it("redirects legacy report routes to Driver Lab", () => {
     window.location.hash = "#/gw7t";
     render(ui());
-    expect(screen.getByText("OUT summary (6 stages)")).toBeDefined();
-    expect(screen.getByText("T2 gate comparison (original vs rework)")).toBeDefined();
+    expect(screen.getByText("Driver lab — GW / EM / GC / GI")).toBeDefined();
     expect(document.getElementById("plot")).toBeDefined();
-    expect(document.querySelectorAll("svg.schem")).toHaveLength(1);
-  });
-  it("lab links to the report", () => {
-    window.location.hash = "#/drv";
-    render(ui());
-    expect(screen.getByText("GW 7T report").getAttribute("href")).toBe("#/");
   });
   it("tabs switch to the pixel page", () => {
     render(ui());

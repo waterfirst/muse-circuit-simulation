@@ -1,4 +1,5 @@
 import { NETS, type CapConn, type Net } from "../lib/circuit";
+import { useLang } from "../lib/i18n";
 
 interface Props {
   caps: CapConn[];
@@ -8,12 +9,14 @@ interface Props {
 }
 
 export default function CapsEditor({ caps, onChange, onAdd, onRemove }: Props) {
+  const { lang } = useLang();
+  const en = lang === "en";
   return (
     <div className="card">
-      <h3>2b. 커패시터 (노드쌍 + pF, 합성 가정값)</h3>
+      <h3>2b. {en ? "Capacitors (node pair + pF, synthetic assumptions)" : "커패시터 (노드쌍 + pF, 합성 가정값)"}</h3>
       <table>
         <tbody>
-          <tr><th>이름</th><th>노드A</th><th>노드B</th><th>pF</th><th>사용</th><th /></tr>
+          <tr><th>{en ? "Name" : "이름"}</th><th>{en ? "Node A" : "노드A"}</th><th>{en ? "Node B" : "노드B"}</th><th>pF</th><th>{en ? "Use" : "사용"}</th><th /></tr>
           {caps.map((c, i) => (
             <tr key={i}>
               <td>{c.name}</td>
@@ -32,7 +35,7 @@ export default function CapsEditor({ caps, onChange, onAdd, onRemove }: Props) {
           ))}
         </tbody>
       </table>
-      <button onClick={onAdd}>+ 캐패시터 추가</button>
+      <button onClick={onAdd}>+ {en ? "Add capacitor" : "캐패시터 추가"}</button>
     </div>
   );
 }

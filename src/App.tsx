@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import LabPage from "./pages/LabPage";
 import PixelPage from "./pages/PixelPage";
-import ReportPage from "./pages/ReportPage";
 import { t, useLang, type Lang } from "./lib/i18n";
 
 const LIVE_URL = "https://waterfirst.pro/circuit-muse/";
@@ -23,7 +22,7 @@ export default function App() {
     window.addEventListener("hashchange", h);
     return () => window.removeEventListener("hashchange", h);
   }, []);
-  const tab = route.startsWith("#/pixel") ? "pixel" : route.startsWith("#/drv") ? "drv" : "gw7t";
+  const tab = route.startsWith("#/pixel") ? "pixel" : "drv";
   const onGhPages = (() => {
     try { return window.location.hostname.endsWith("github.io"); } catch { return false; }
   })();
@@ -49,11 +48,10 @@ export default function App() {
         </p>
       </div>
       <nav className="tabs">
-        <a href="#/" className={tab === "gw7t" ? "on" : ""}>{t(lang, "tab_report")}</a>
         <a href="#/drv" className={tab === "drv" ? "on" : ""}>{t(lang, "tab_drv")}</a>
         <a href="#/pixel" className={tab === "pixel" ? "on" : ""}>{t(lang, "tab_pixel")}</a>
       </nav>
-      {tab === "pixel" ? <PixelPage /> : tab === "drv" ? <LabPage /> : <ReportPage />}
+      {tab === "pixel" ? <PixelPage /> : <LabPage />}
     </div>
   );
 }

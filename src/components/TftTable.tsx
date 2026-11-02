@@ -1,5 +1,6 @@
 import { DEG_FRESH, NETS, TNAMES, type DegKey, type Net, type Pin, type TName, type TftMap } from "../lib/circuit";
 import { DEG_HL } from "./Aging";
+import { useLang } from "../lib/i18n";
 
 interface Props {
   tft: TftMap;
@@ -13,12 +14,13 @@ interface Props {
 const DEG_KEYS: DegKey[] = ["dVth", "ion", "ioff", "ss"];
 
 export default function TftTable({ tft, onChange, onToggle, onSize, onType, onDeg }: Props) {
+  const { lang } = useLang();
   return (
     <div style={{ overflowX: "auto" }}>
     <table id="tfttab">
       <tbody>
         <tr><th>TFT</th><th>G</th><th>S</th><th>D</th><th>W(um)</th><th>L(um)</th><th>P/N</th>
-          <th>ΔVth</th><th>Ion×</th><th>Ioff×</th><th>SS×</th><th>사용</th></tr>
+          <th>ΔVth</th><th>Ion×</th><th>Ioff×</th><th>SS×</th><th>{lang === "en" ? "Use" : "사용"}</th></tr>
         {TNAMES.map((t) => (
           <tr key={t} style={tft[t].on ? undefined : { opacity: 0.45 }}>
             <td>{t}</td>

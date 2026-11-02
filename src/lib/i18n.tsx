@@ -18,6 +18,8 @@ const STR: Record<string, { en: string; kr: string }> = {
   tab_report: { en: "GW 7T report", kr: "GW 7T 리포트" },
   tab_drv: { en: "Driver (GW/EM/GC/GI)", kr: "드라이버 (GW/EM/GC/GI)" },
   tab_pixel: { en: "Pixel (8T1C)", kr: "픽셀 (8T1C)" },
+  tab_hpd: { en: "HPD 6T initial", kr: "HPD 6T 초기" },
+  tab_hpd_improved: { en: "HPD 6T improved", kr: "HPD 6T 개선" },
   judge_title: { en: "Judge brief", kr: "심사위원 요약" },
   judge_body: {
     en: "Circuit Muse is an evidence-first TFT circuit simulation workspace. " +

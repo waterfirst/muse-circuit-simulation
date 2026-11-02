@@ -119,7 +119,7 @@ export default function LabPage() {
       <div className="card">
         <h3>2.5 Schematic (click a TFT to cycle, direct pin wiring) — P has a gate bubble</h3>
         <SchemEditor tft={tft} caps={caps} pickedNet={pickedNet} onPickNet={setPickedNet} onPinClick={onPinClick} />
-        <p className="note" id="scheminfo">{schemInfoText(tft)}</p>
+        <p className="note" id="scheminfo">{schemInfoText(tft, lang)}</p>
         <NetPicker picked={pickedNet} onPick={setPickedNet} />
       </div>
       <div className="card">

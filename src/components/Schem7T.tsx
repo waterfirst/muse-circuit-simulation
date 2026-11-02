@@ -151,11 +151,11 @@ export default function Schem7T() {
 <text x="772" y="300" fontSize="8" textAnchor="start" fill="#555">CL</text>
 <rect x="700" y="44" width="92" height="74" fill="#fff" stroke="#111" strokeWidth="1.2"/>
 <text x="706" y="58" fontSize="9.5" textAnchor="start" fill="#111" font-weight="bold">GW 7T STAGE</text>
-<text x="706" y="71" fontSize="8.5" textAnchor="start" fill="#333">T2.G=B / 6단</text>
+<text x="706" y="71" fontSize="8.5" textAnchor="start" fill="#333">T2.G=B / 6 stages</text>
 <text x="706" y="83" fontSize="8.5" textAnchor="start" fill="#333">250kHz H=4us</text>
 <text x="706" y="95" fontSize="8.5" textAnchor="start" fill="#333">VGH 8 VGL -9.5</text>
 <text x="706" y="107" fontSize="8.5" textAnchor="start" fill="#333">C1 1p C2 0.2p</text>
-<text x="30" y="458" fontSize="9" textAnchor="start" fill="#666">IN=FLM(1단 입력) / OUT→다음단 IN / PMOS: 게이트 버블+화살표=source</text>
+<text x="30" y="458" fontSize="9" textAnchor="start" fill="#666">IN=FLM (stage-1 input) / OUT → next-stage IN / PMOS: gate bubble + arrow = source</text>
 </svg>
   );
 }

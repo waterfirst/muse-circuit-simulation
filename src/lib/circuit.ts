@@ -121,9 +121,11 @@ export function buildDesc(params: Params, tft: TftMap, preset: PresetName = "GW"
     caps: caps.filter((c) => c.on).map((c) => ({ a: c.a, b: c.b, pf: c.pf, name: c.name })) };
 }
 
-export function hinfoText(freq: number): string {
+export function hinfoText(freq: number, lang: "en" | "kr" = "kr"): string {
   const f = freq || 250;
-  return `1H = ${(1000 / f).toFixed(3)} us (주파수 ${f} kHz 라인타임)`;
+  return lang === "en"
+    ? `1H = ${(1000 / f).toFixed(3)} us (${f} kHz line time)`
+    : `1H = ${(1000 / f).toFixed(3)} us (주파수 ${f} kHz 라인타임)`;
 }
 
 // ---- schematic geometry ----
@@ -180,10 +182,12 @@ export function routeSpines(netXY: Record<string, [number, number][]>):
   return { lines, labels };
 }
 
-export function schemInfoText(tft: TftMap): string {
+export function schemInfoText(tft: TftMap, lang: "en" | "kr" = "kr"): string {
   const bad = TNAMES.filter((t) => tft[t].on && !(tft[t].G && tft[t].S && tft[t].D));
-  return "현재: " + TNAMES.filter((t) => tft[t].on).map((t) => `${t}(${tft[t].G}/${tft[t].S}/${tft[t].D})`).join(" ") +
-    (bad.length ? " / 미지정: " + bad.join(",") : "") + " / 넷 버튼 선택 후 핀을 누르면 직접 붙습니다.";
+  const active = TNAMES.filter((t) => tft[t].on).map((t) => `${t}(${tft[t].G}/${tft[t].S}/${tft[t].D})`).join(" ");
+  return lang === "en"
+    ? "Active: " + active + (bad.length ? " / Unassigned: " + bad.join(",") : "") + " / Select a net button, then click a pin to wire it directly."
+    : "현재: " + active + (bad.length ? " / 미지정: " + bad.join(",") : "") + " / 넷 버튼 선택 후 핀을 누르면 직접 붙습니다.";
 }
 
 // ---- waveform lanes ----
