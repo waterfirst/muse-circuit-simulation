@@ -31,7 +31,7 @@ CLK2/CLK1 through 2nd/3rd inputs).
 Behavior check vs patent: start pulse rests low, pulses high (≈4H in the
 patent); outputs rest low (emission) and pulse high with ~start−1H width,
 shifting 1H per stage (patent: 4H start → 3H outputs). Measured: 2H→1.01H,
-4H→3.01H, 8H→7.01H (see SELF_CHECK.txt). Width tolerance ±1.5H.
+4H→3.01H, 8H→7.01H (see docs/archive/SELF_CHECK.txt). Width tolerance ±1.5H.
 
 ## GC / GI — ASSUMPTION, reviewer check requested
 

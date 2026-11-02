@@ -4,6 +4,23 @@ React + Vite front end and local `ngspice` backend for the GW netlist lab.
 It simulates LTPS/oxide TFT driver and pixel circuits with the bundled
 `ptft_fit.osdi` compact model.
 
+## Why this exists
+
+Display-driver circuit validation is usually scattered across netlists,
+screenshots, papers, and hand calculations. Muse keeps them in one place:
+
+- **Topology first.** Driver and pixel circuits are shown as schematics you
+  can inspect before running anything.
+- **Assumptions stated, not hidden.** Sizes and timings that are not taken
+  from a source (for example, the synthetic device sizes in the GW stages) are
+  flagged in the UI and traced to the reference they come from.
+- **Reproducible runs.** Predefined ngspice netlists with the OSDI-compiled
+  TFT model produce waveforms and reliability-margin numbers that anyone can
+  rerun with the same inputs.
+
+Start with the quick UI demo (section 1). Run a new simulation with the full
+local backend (section 2).
+
 ## Choose an execution mode
 
 | Goal | What is required | What works |
