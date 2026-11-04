@@ -14,7 +14,7 @@ import sys
 
 PATTERNS = [
     (r"coka" + "cdir", "personal checkout path"),
-    (r"/home/waterfirst" + "/global_placeholder", "personal home path"),  # placeholder keeps the script self-clean
+    (r"/home/[A-Za-z0-9_.-]+/", "personal home path"),
     (r"100\.\d+\.\d+\.\d+", "tailnet/private IP"),
     (r"192\.168\.\d+\.\d+", "private IP"),
     (r"10\.\d+\.\d+\.\d+", "private IP"),
@@ -24,24 +24,6 @@ PATTERNS = [
     (r"AKIA[0-9A-Z]{16}", "possible AWS key"),
     (r"ghp_[A-Za-z0-9]{20,}", "possible github token"),
 ]
-
-ALLOW_FILES = {
-    "scripts/check_no_company_data.py",
-    "deploy/circuit-muse.service.example",
-    "server/tests/test_hardening.py",
-    "docs/DEPLOY_CIRCUIT_MUSE.md",
-}
-TAILNET_EXAMPLE = "100.69" + ".9.76"  # kept out of source as a literal
-ALLOW_TEXT = {
-    # BIND_HOST example in docs/service template (link-local tailnet IP)
-    "100.69.9.76": {"deploy/circuit-muse.service.example",
-                    "docs/DEPLOY_CIRCUIT_MUSE.md",
-                    "server/tests/test_hardening.py",
-                    "scripts/check_no_company_data.py"},
-    "/home/USER/": {"deploy/circuit-muse.service.example",
-                    "docs/DEPLOY_CIRCUIT_MUSE.md"},
-}
-
 
 def tracked_files():
     out = subprocess.run(["git", "ls-files"], capture_output=True,
@@ -74,17 +56,8 @@ def main():
         for pat, label in PATTERNS:
             for m in re.finditer(pat, text):
                 hit = m.group(0)
-                allowed = False
-                for key, paths in ALLOW_TEXT.items():
-                    if key in hit and f in paths:
-                        allowed = True
-                if f in ALLOW_FILES and label in (
-                        "tailnet/private IP", "personal home path"):
-                    # allowlist handled per-hit above; bare pass not enough
-                    pass
-                if not allowed:
-                    fails.append(f"{f}: {label}: {hit[:60]!r}")
-                    break
+                fails.append(f"{f}: {label}: {hit[:60]!r}")
+                break
     if fails:
         print("COMPANY-DATA CHECK FAILED:")
         for x in fails[:30]:

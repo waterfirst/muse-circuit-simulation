@@ -26,7 +26,7 @@ export const VC: Record<string, { G: Net; S: Net; D: Net }> = {
   T4:{G:"B",S:"VGH",D:"C"},T5:{G:"CLK1",S:"QB",D:"VGL"},T6:{G:"QB",S:"VGH",D:"OUT"},
   T7:{G:"Q",S:"OUT",D:"CLK2"},T8:{G:"VGL",S:"B",D:"Q"},T9:{G:"CLK2",S:"QB",D:"C"},
 };
-// EM 12T3C from Samsung Display US 11,205,374 B2 Fig.4 (M1..M12 -> T1..T12,
+// EM 12T3C from public patent US 11,205,374 B2 Fig.4 (M1..M12 -> T1..T12,
 // VDD->VGH, VSS->VGL). N7 = unnamed M1-M2 series junction (assumption).
 // GC/GI reuse this stage (assumption, see docs/CIRCUITS.md).
 export const EM12: Record<string, { G: Net; S: Net; D: Net; W: number; L: number }> = {

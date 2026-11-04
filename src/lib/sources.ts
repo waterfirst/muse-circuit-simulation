@@ -1,5 +1,5 @@
 // Source trace: which patent sentence each EM connection comes from.
-// Samsung Display US 11,205,374 B2, Fig.4 first embodiment.
+// Public patent US 11,205,374 B2, Fig.4 first embodiment.
 // Sentences are condensed paraphrases of the Google Patents text;
 // the full table lives in docs/CIRCUITS.md.
 // Mapping: patent 101->IN (FLM at stage 1), 102->CKA, 103->CKB,
@@ -12,7 +12,7 @@ export interface TraceRow {
   sentence: string;
 }
 
-export const EM_PATENT = "Samsung Display US 11,205,374 B2, Fig.4 (first embodiment)";
+export const EM_PATENT = "Public patent US 11,205,374 B2, Fig.4 (first embodiment)";
 
 export const EM_TRACE: TraceRow[] = [
   { id: "T6", patent: "M6", conn: "G=CLK1 S=FLM D=N1",

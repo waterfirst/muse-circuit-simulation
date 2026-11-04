@@ -3,7 +3,7 @@
 All W/L, capacitances, and timings are SYNTHETIC ASSUMPTIONS (not from any
 company netlist or measured data). Only public patents/literature were used.
 
-## EM 12T3C — Samsung Display US 11,205,374 B2, Fig.4 first embodiment
+## EM 12T3C — public patent US 11,205,374 B2, Fig.4 first embodiment
 
 Mapping: patent M1..M12 → T1..T12, VDD → VGH, VSS → VGL,
 1st input → IN (FLM at stage 1), 2nd input → CKA, 3rd input → CKB.

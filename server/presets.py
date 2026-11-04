@@ -1,8 +1,8 @@
 """Presets for gw-react display-circuit simulator.
 
 Sources (public only):
-- GW 9T: carried over from gw_lab (validated vC topology).
-- EM 12T3C: Samsung Display US 11,205,374 B2, Fig.4 first embodiment.
+- GW 9T: carried over from a prior public prototype (validated vC topology).
+- EM 12T3C: public patent US 11,205,374 B2, Fig.4 first embodiment.
   Patent nodes M1..M12 map to T1..T12 here; VDD->VGH, VSS->VGL,
   2nd input->CKA, 3rd input->CKB, 1st input->IN (FLM at stage 1).
   See docs/CIRCUITS.md for the per-connection patent sentences.

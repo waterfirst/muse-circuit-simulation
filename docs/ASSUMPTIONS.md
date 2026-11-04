@@ -1,4 +1,4 @@
-# ASSUMPTIONS — synthetic values (no company data anywhere)
+# ASSUMPTIONS — synthetic values
 
 Every number below is a synthetic assumption chosen by the author from public
 patents/literature only. A reviewer should check each of them first.
@@ -6,7 +6,7 @@ patents/literature only. A reviewer should check each of them first.
 ## Devices and sizes
 
 - Model: `ptft_fit` Verilog-A (`models/ptft_fit.va`, copied from public study
-  material under `~/tft_sim_study/`), compiled locally with OpenVAF
+  material), compiled locally with OpenVAF
   (`scripts/build_model.sh`). `POL=1` = p-type LTPS, `POL=-1` = n-type oxide,
   each verified with a one-device I–V deck (`server/runs/probe_p/`,
   `server/runs/probe_n/`): P off at Vg≈Vs with Id≈5e-14A, conducting for
@@ -21,7 +21,7 @@ patents/literature only. A reviewer should check each of them first.
 
 ## Circuits
 
-- EM 12T3C: connections from Samsung Display US 11,205,374 B2 text
+- EM 12T3C: connections from public patent US 11,205,374 B2 text
   (see `docs/CIRCUITS.md`); S/D orientation of pass TFTs, the unnamed M1–M2
   junction `N7`, and all sizes are assumptions.
 - GC/GI reuse the EM stage with a 2H start pulse (assumption, not a separate

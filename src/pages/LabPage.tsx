@@ -112,7 +112,7 @@ export default function LabPage() {
           <button className="chip" onClick={() => { setPreset("GW"); setTft(presetToMap(BROKEN)); }}>
             Broken example (A floating)</button>
         </div>
-        <p className="note">EM: Samsung US 11,205,374 B2 Fig.4 12T3C. GC/GI reuse the same stage (assumption, width 2H). See the source table below and docs/CIRCUITS.md.</p>
+        <p className="note">EM: public patent US 11,205,374 B2 Fig.4 12T3C. GC/GI reuse the same stage (assumption, width 2H). See the source table below and docs/CIRCUITS.md.</p>
       </div>
       <SourceTrace preset={preset} />
       <ParamForm params={params} onChange={setParams} />
