@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import LabPage from "./pages/LabPage";
+import GbCandidatePage from "./pages/GbCandidatePage";
 import PixelPage from "./pages/PixelPage";
 import { t, useLang, type Lang } from "./lib/i18n";
 
@@ -22,7 +23,7 @@ export default function App() {
     window.addEventListener("hashchange", h);
     return () => window.removeEventListener("hashchange", h);
   }, []);
-  const tab = route.startsWith("#/pixel") ? "pixel" : "drv";
+  const tab = route.startsWith("#/gb-candidate") ? "gb" : route.startsWith("#/pixel") ? "pixel" : "drv";
   const onGhPages = (() => {
     try { return window.location.hostname.endsWith("github.io"); } catch { return false; }
   })();
@@ -48,10 +49,12 @@ export default function App() {
         </p>
       </div>
       <nav className="tabs">
+        <a href="#/gb-candidate" className={tab === "gb" ? "on" : ""}>GB 합성 수정 후보</a>
         <a href="#/drv" className={tab === "drv" ? "on" : ""}>{t(lang, "tab_drv")}</a>
         <a href="#/pixel" className={tab === "pixel" ? "on" : ""}>{t(lang, "tab_pixel")}</a>
       </nav>
-      {tab === "pixel" ? <PixelPage /> : <LabPage />}
+      {tab === "gb" ? <GbCandidatePage /> : tab === "pixel" ? <PixelPage /> : <LabPage />}
     </div>
   );
 }
+

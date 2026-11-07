@@ -1,0 +1,165 @@
+{
+  "tag": "original_topology_W112_native_phase",
+  "frames": [
+    {
+      "pass": false,
+      "stages": [
+        {
+          "stage": 1,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.98300046514266,
+          "rest_min_v": 7.98300046514266,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.98300046514266,
+          "expected_hold_margin_v": 0.98300046514266
+        },
+        {
+          "stage": 2,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983016710636488,
+          "rest_min_v": 7.983016710636488,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983016710636488,
+          "expected_hold_margin_v": 0.9830167106364884
+        },
+        {
+          "stage": 3,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983000167541412,
+          "rest_min_v": 7.983000167541412,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983000167541412,
+          "expected_hold_margin_v": 0.9830001675414124
+        },
+        {
+          "stage": 4,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983016710597339,
+          "rest_min_v": 7.983016710597339,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983016710597339,
+          "expected_hold_margin_v": 0.9830167105973393
+        },
+        {
+          "stage": 5,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983000172845802,
+          "rest_min_v": 7.983000172845802,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983000172845802,
+          "expected_hold_margin_v": 0.9830001728458022
+        },
+        {
+          "stage": 6,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.996793807612977,
+          "rest_min_v": 7.996793807612977,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.996793807612977,
+          "expected_hold_margin_v": 0.9967938076129768
+        }
+      ],
+      "criterion": "One complete midpoint-crossing low pulse during 150\u2013220 us, low <= -6 V, rest >= +7 V, ordered starts. Width reported, not constrained without specified target.",
+      "timing_pass": false,
+      "strict_pass": false
+    },
+    {
+      "pass": false,
+      "stages": [
+        {
+          "stage": 1,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983062828372502,
+          "rest_min_v": 7.983062828372502,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983062828372502,
+          "expected_hold_margin_v": 0.9830628283725016
+        },
+        {
+          "stage": 2,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983078752835845,
+          "rest_min_v": 7.983078752835845,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983078752835845,
+          "expected_hold_margin_v": 0.9830787528358451
+        },
+        {
+          "stage": 3,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983062671347257,
+          "rest_min_v": 7.983062671347257,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983062671347257,
+          "expected_hold_margin_v": 0.9830626713472572
+        },
+        {
+          "stage": 4,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983078752819262,
+          "rest_min_v": 7.983078752819262,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983078752819262,
+          "expected_hold_margin_v": 0.9830787528192619
+        },
+        {
+          "stage": 5,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.983062676609824,
+          "rest_min_v": 7.983062676609824,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.983062676609824,
+          "expected_hold_margin_v": 0.9830626766098236
+        },
+        {
+          "stage": 6,
+          "pulses": 0,
+          "start_us": null,
+          "width_us": null,
+          "low_min_v": 7.996805536639251,
+          "rest_min_v": 7.996805536639251,
+          "ordered": false,
+          "pass": false,
+          "expected_hold_min_v": 7.996805536639251,
+          "expected_hold_margin_v": 0.9968055366392514
+        }
+      ],
+      "criterion": "One complete midpoint-crossing low pulse during 150\u2013220 us, low <= -6 V, rest >= +7 V, ordered starts. Width reported, not constrained without specified target.",
+      "timing_pass": false,
+      "strict_pass": false
+    }
+  ]
+}

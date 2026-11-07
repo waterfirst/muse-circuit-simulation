@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 import backend
 from backend import run_job
+from gb_candidate import run_candidate
 from presets import DRIVER_DEFAULTS, PIXEL_DEFAULTS, PIXEL_TFT
 import aging
 
@@ -220,7 +221,7 @@ class Handler(BaseHTTPRequestHandler):
         if not self._reject_bad_origin():
             return
         if self.path not in ("/api/sim", "/api/pixel", "/api/stress",
-                             "/api/margin"):
+                             "/api/margin", "/api/gb-candidate"):
             self._send(404, {"error": "not found"})
             return
         try:
@@ -253,7 +254,10 @@ class Handler(BaseHTTPRequestHandler):
                              "warnings": [], "suggestions": []})
             return
         try:
-            if self.path == "/api/stress":
+            if self.path == "/api/gb-candidate":
+                finished, result = self._run_with_timeout(
+                    lambda: run_candidate(desc))
+            elif self.path == "/api/stress":
                 finished, result = self._run_with_timeout(
                     lambda: aging.run_stress(desc))
             else:
@@ -290,3 +294,4 @@ if __name__ == "__main__":
     _prune_runs()
     print(f"gw-react sim on http://{_host}:8768 (Ctrl+C to stop)")
     HTTPServer((_host, 8768), Handler).serve_forever()
+
