@@ -227,3 +227,38 @@ models/ptft_fit.va      Verilog-A source model
 scripts/build_model.sh  rebuilds the OSDI model with OpenVAF
 server/runs/            saved deck/description examples and generated jobs
 ```
+
+
+## GB synthetic candidate experiment
+
+Open the **GB 합성 수정 후보** tab (`#/gb-candidate`) with the Python backend
+running. Choose one of the four T9 56/112 µm × C3 0.3/1 pF buttons, or enter
+T9 4–512 µm and C3 0.05–5 pF, then press **이 조건으로 실제 실행**.
+Both parameters apply to all six stages. This dedicated example deliberately
+keeps the exact reference topology/timing/model fixed instead of passing it
+through the generic 12-TFT preset generator. The UI lists those assumptions.
+
+The new `POST /api/gb-candidate` runs a trusted, fixed deck template with only
+two numeric substitutions. It supports an OSDI-enabled ngspice executable or
+shared library in a fresh subprocess. Numerical completion is not a circuit
+PASS. Results are never substituted with a stored demo on failure. Changing
+parameters clears the old displayed result; download the exact deck from the
+result link before server retention removes it. Existing retention defaults
+are 200 runs / 7 days, not permanent storage. The request can continue running
+if the browser tab closes or its wait expires.
+
+This is a synthetic redesigned candidate, not the original 16T3C circuit:
+C3 is N2–OUT (original: N4–N3), C4 is an added OUT–ground 5 pF load,
+T10/T14/T15 connectivity changed, and the model VT0 is a single-point
+threshold calibration. The UI allows fresh parameter comparisons only;
+it does not apply the general lab's aging controls.
+
+Frontend-only hosting (including GitHub Pages) cannot execute this backend.
+Deploying the UI alone is insufficient: the Python route and OSDI-capable
+ngspice runtime must also be deployed to the intended simulation server.
+
+The GB addition is source-only: rebuild with `npm ci && npm run build`; the
+tracked prebuilt `dist/` does not yet contain this tab. Small reproducible
+research inputs are in [`experiments/gb_candidate`](experiments/gb_candidate).
+See [`docs/GB_CANDIDATE_REVIEW.md`](docs/GB_CANDIDATE_REVIEW.md) for verification
+limits and safe deployment steps.

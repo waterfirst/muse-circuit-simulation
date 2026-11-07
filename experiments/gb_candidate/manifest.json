@@ -1,0 +1,66 @@
+{
+  "candidate_W56_C03": {
+    "deck_sha256": "b98c704e448fbe76794139ea1ac18badec35fb8bf7bbd747728ddbaa39ac7f6f",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "candidate_W56_C1": {
+    "deck_sha256": "5e23d6bb57cc5daddcc1857d8bc4b1ab40851b6ac1544000fcacc1c3b31cdc68",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "candidate_W112_C03": {
+    "deck_sha256": "4b927aece4e52a8e9697ef271d74db3e54e97ecbe620951ebf5b166d3657ade7",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "candidate_W112_C1": {
+    "deck_sha256": "43f9847d90907fb58136e58e4b4197cfbfab3a2ceb00972795f1c7301f205e62",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "original_topology_W112_native_phase": {
+    "deck_sha256": "e8f04097f555d55c955f2543838cb6235247eb1469ad8ec4734ec19be0ce8b39",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "original_topology_W56_native_phase": {
+    "deck_sha256": "6594417c02a593538f5c77cee67d0017f940263b5cab07265287791629da9404",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "A_candidate_DS": {
+    "deck_sha256": "9e44cb4504e651b33a1f9f2545f31a28ea1c58658ff1206dbd27eb458f049122",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "A_candidate_DS_L6": {
+    "deck_sha256": "c109bb4e0eb38e5fe78df74def544220443aa3077140156d864bc033322187df",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "B_original_DS_L6": {
+    "deck_sha256": "ca5325cc60a20d3cf8f62f4cad2287480b4bf021c1a6a54fbf940c37ee03bd28",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "original_topology_W56_swapped": {
+    "deck_sha256": "683cec4ed558a4aabfbbcf984babf79ba13785a704b312e8617e3e6a993df0e1",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "B_original_DS": {
+    "deck_sha256": "10c7ebbd641ed0bd7f1f6804f346d091faf5a5d4b7b27cf8630ea967130c4e27",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "original_topology_W112_swapped": {
+    "deck_sha256": "b663bee0c66cc6b6c4f7f048bb4722e3b801c21fe5a75734a682833ceafb231f",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "original_C03_swapped": {
+    "deck_sha256": "683cec4ed558a4aabfbbcf984babf79ba13785a704b312e8617e3e6a993df0e1",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "original_C1_swapped": {
+    "deck_sha256": "a3d1b8659ef286cd15f076174148b18be0a62ffbe13db53c7aa90fa1ecf9a2ee",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "original_C03_native_phase": {
+    "deck_sha256": "6594417c02a593538f5c77cee67d0017f940263b5cab07265287791629da9404",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  },
+  "original_C1_native_phase": {
+    "deck_sha256": "fefb5c18debb43d3fea358add57dea0541c49605468f2d38be85c39c36cbe7c0",
+    "description": "Recorded research experiment; model/input/load assumptions apply."
+  }
+}
